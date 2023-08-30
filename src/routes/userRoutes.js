@@ -1,7 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const userController = require("../controllers/users");
-
+const authController = require('../controllers/auth');
 const passport = require("passport");
 
 require("../services/authenticate");
@@ -181,4 +181,8 @@ userRouter
 userRouter
   .route("/updateinterests/:id")
   .put(userController.updateUserInterests);
+
+userRouter.route('/signup').post(authController.signUp);
+userRouter.route('/forgot-my-password').post(authController.forgotPassword)
+
 module.exports = userRouter;
