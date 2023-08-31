@@ -2,8 +2,8 @@ const userModel = require("../models/userSchema");
 const users = require('../models/userSchema');
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const asyncHandler=require('express-async-handler')
-const bcrypt=require('bcrypt')
+const asyncHandler = require('express-async-handler')
+const bcrypt = require('bcrypt')
 var admin = require("firebase-admin");
 const serviceAccount = require("../../service_account.json");
 const catchAsync = require('../utils/catchAsync');
@@ -221,13 +221,12 @@ exports.login = asyncHandler(async (req, res, next) => {
   const User = await userModel.findOne({ userName: req.body.userName });
 
   if (!User || !(await bcrypt.compare(req.body.password, User.password))) {
-    return next(new AppError("incorect usrName or password",401));
+    return next(new AppError("incorect usrName or password", 401));
   }
 
-   createSendToken(User,200,res);
+  createSendToken(User, 200, res);
 
-    next();
-  // res.status(200).json({ data: User, token });
+  res.status(200).json({ data: User, token });
 })
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -310,15 +309,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.changeUserPassword = asyncHandler(async(req, res, next) => {
+exports.changeUserPassword = asyncHandler(async (req, res, next) => {
 
   const Document = await userModel.findByIdAndUpdate(req.params.id, {
-      password: await bcrypt.hash(req.body.password, 12),
-      passwordChangedAt: Date.now(),
+    password: await bcrypt.hash(req.body.password, 12),
+    passwordChangedAt: Date.now(),
 
   }, { new: true })
   if (!Document) {
-      return next(new AppError(`cant find this Document: ${req.params.id}`, 404))
+    return next(new AppError(`cant find this Document: ${req.params.id}`, 404))
   }
   res.status(200).json({ data: Document })
 });
@@ -341,7 +340,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save();
 
-  
+
 
   res.status(200).json({
     status: 'success',
