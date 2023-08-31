@@ -187,5 +187,7 @@ userRouter
 
 userRouter.route('/signup').post(authController.signUp);
 userRouter.route('/forgot-my-password').post(authController.forgotPassword)
+userRouter.put('/update-my-password/:id', authController.changeUserPassword)
+
 
 module.exports = userRouter;

@@ -216,54 +216,12 @@ exports.authenticate = (req, res, next) => {
     });
   })(req, res, next);
 };
-// const signToken = id => {
-//   return jwt.sign({ id }, process.env.JWT_SECRET, {
-//     expiresIn: process.env.JWT_EXPIRES_IN
-//   });
-// };
-// const createSendToken = (user, statusCode, res) => {
-//   const token = signToken(user._id);
-//   const cookieOptions = {
-//     expires: new Date(
-//       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-//     ),
-
-//     httpOnly: true
-//   };
-//   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-//   res.cookie('JWT', token, cookieOptions);
-//   //delete the password from the data shown
-//   user.password = undefined;
-//   res.status(statusCode).json({
-//     status: 'success',
-//     token,
-//     data: {
-//       user
-//     }
-//   });
-// };
-
-
-// exports.signUp = asyncHandler(async (req, res, next) => {
-//   // console.log(req.body);
-//   const newUser = await userModel.create({
-//     firstName: req.body.firstName,
-//     lastName: req.body.lastName,
-//     userName: req.body.userName,
-//     password: req.body.password,
-//     email: req.body.email,
-//   });
-
-//   createSendToken(newUser, 201, res);
-
-//   next();
-// });
 
 exports.login = asyncHandler(async (req, res, next) => {
   const User = await userModel.findOne({ userName: req.body.userName });
 
   if (!User || !(await bcrypt.compare(req.body.password, User.password))) {
-    return next(new Error("incorect usrName or password"));
+    return next(new AppError("incorect usrName or password",401));
   }
 
    createSendToken(User,200,res);
@@ -350,4 +308,17 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       )
     );
   }
+});
+
+exports.changeUserPassword = asyncHandler(async(req, res, next) => {
+
+  const Document = await userModel.findByIdAndUpdate(req.params.id, {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+
+  }, { new: true })
+  if (!Document) {
+      return next(new AppError(`cant find this Document: ${req.params.id}`, 404))
+  }
+  res.status(200).json({ data: Document })
 });
