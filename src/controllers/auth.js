@@ -1,10 +1,14 @@
 const userModel = require("../models/userSchema");
+const users = require('../models/userSchema');
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const asyncHandler=require('express-async-handler')
 const bcrypt=require('bcrypt')
 var admin = require("firebase-admin");
 const serviceAccount = require("../../service_account.json");
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
+const Email = require('../utils/email');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -262,8 +266,88 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new Error("incorect usrName or password"));
   }
 
-  const token = createSendToken(User,200,res);
+   createSendToken(User,200,res);
 
     next();
   // res.status(200).json({ data: User, token });
+})
+const signToken = id => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN
+  });
+};
+
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+
+    httpOnly: true
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  res.cookie('JWT', token, cookieOptions);
+  //delete the password from the data shown
+  user.password = undefined;
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user
+    }
+  });
+};
+
+exports.signUp = catchAsync(async (req, res, next) => {
+  // console.log(req.body);
+  const newUser = await userModel.create({
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    userName: req.body.userName,
+    password: req.body.password,
+    email: req.body.email,
+  });
+
+  createSendToken(newUser, 201, res);
+
+  next();
+});
+
+
+
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const user = await userModel.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new AppError("There is no user with such email address!!", 404)
+    );
+  }
+  const resetToken = await user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  //FIXME:
+  try {
+    const resetURL = `${req.protocol}://${req.get(
+      "host"
+    )}/users/reset-password/${resetToken}`;
+    await new Email(user, resetURL).sendPasswordReset(res);
+    res.status(200).json({
+      status: "success",
+      message: "reset token sent to your email",
+      resetToken,
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    console.log(err);
+    return next(
+      new AppError(
+        "There was an error sending the email , Try again Later! ",
+        500
+      )
+    );
+  }
 });

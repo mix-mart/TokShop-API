@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcrypt");
 const decode = require("../shared/base64");
-
+const crypto = require('crypto');
 const value = {
   type: String,
   required: [true, "This field is required"],
@@ -56,7 +56,7 @@ const userSchema = new Schema(
     },
     followersCount: {
       type: Number,
-      default:0
+      default: 0
     },
     followingCount: {
       type: Number,
@@ -149,8 +149,8 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
-    receivemessages:{
-	  type: Boolean,
+    receivemessages: {
+      type: Boolean,
       default: true,
     },
     renewUpgrade: {
@@ -181,6 +181,9 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -222,6 +225,18 @@ userSchema.pre('save', async function(next) {
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
+
+
+userSchema.methods.createPasswordResetToken = async function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  console.log(resetToken);
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  return resetToken;
+};
 
 
 const users = model("user", userSchema);
