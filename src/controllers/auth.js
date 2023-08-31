@@ -322,3 +322,29 @@ exports.changeUserPassword = asyncHandler(async(req, res, next) => {
   }
   res.status(200).json({ data: Document })
 });
+
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  // Find user by reset token
+  const user = await userModel.findOne({
+    passwordResetToken: req.params.token,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError('Invalid or expired reset token', 400));
+  }
+
+  // Update password and remove reset token
+  user.password = req.body.password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset successful!',
+  });
+});
