@@ -7,6 +7,7 @@ const passport = require("passport");
 require("../services/authenticate");
 
 const multer = require("multer");
+const { login, signUp } = require("../controllers/auth");
 
 const storage = multer.memoryStorage();
 
@@ -181,4 +182,6 @@ userRouter
 userRouter
   .route("/updateinterests/:id")
   .put(userController.updateUserInterests);
+  // userRouter.route('/signup').post(signUp); 
+  userRouter.route("/login").post(login)
 module.exports = userRouter;
