@@ -264,6 +264,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
   }
   req.user = curentUser;
   next();
+  //
 });
 
 exports.signUp = catchAsync(async (req, res, next) => {
