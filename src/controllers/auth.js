@@ -350,11 +350,12 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
   }
 
   // Hash the new password
-  const newPasswordHash = await bcrypt.hash(req.body.newPassword, 12);
+  // const newPasswordHash = await bcrypt.hash(req.body.newPassword, 12);
 
   // Update the user's password
-  user.password = newPasswordHash;
-  user.passwordChangedAt = Date.now();
+  user.password = req.body.newPassword;
+  
+  
   await user.save();
 
   // Send a success response
