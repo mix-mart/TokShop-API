@@ -187,7 +187,7 @@ userRouter
 
 userRouter.route('/signup').post(authController.signUp);
 userRouter.route('/forgot-my-password').post(authController.forgotPassword)
-userRouter.put('/update-my-password/:id', passport.authenticate("jwt", { session: false }),authController.changeUserPassword)
+userRouter.route('/update/password').put( authController.protect,authController.changePassword)
 
 // Route for resetting password using the reset token
 userRouter.patch('/reset-password/:token', authController.resetPassword);

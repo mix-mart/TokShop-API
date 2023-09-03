@@ -1,14 +1,15 @@
 const userModel = require("../models/userSchema");
-const users = require('../models/userSchema');
+const users = require("../models/userSchema");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const asyncHandler=require('express-async-handler')
-const bcrypt=require('bcrypt')
+const asyncHandler = require("express-async-handler");
+const bcrypt = require("bcrypt");
 var admin = require("firebase-admin");
 const serviceAccount = require("../../service_account.json");
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const Email = require('../utils/email');
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const Email = require("../utils/email");
+const { token } = require("morgan");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -217,45 +218,53 @@ exports.authenticate = (req, res, next) => {
   })(req, res, next);
 };
 
-exports.login = asyncHandler(async (req, res, next) => {
-  const User = await userModel.findOne({ userName: req.body.userName });
+const createtoken = (payload) =>
+  jwt.sign({ userId: payload }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 
-  if (!User || !(await bcrypt.compare(req.body.password, User.password))) {
-    return next(new AppError("incorect usrName or password",401));
+exports.protect = asyncHandler(async (req, res, next) => {
+  //1:check if token exist
+  //console.log(req.headers)
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  if (!token) {
+    return next(
+      new AppError("you are not login to get acsses this route", 401)
+    );
   }
 
-   createSendToken(User,200,res);
-
-    next();
-  // res.status(200).json({ data: User, token });
-})
-const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  });
-};
-
-const createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-
-    httpOnly: true
-  };
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-  res.cookie('JWT', token, cookieOptions);
-  //delete the password from the data shown
-  user.password = undefined;
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user
+  //2:verfiy token(change happen ,expired token)
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // req.user = decoded;
+  //2:check if user exist
+  const curentUser = await userModel.findById(decoded.userId);
+  if (!curentUser) {
+    return next(
+      new AppError(
+        "THE USER THAT BELONG TO THIS TOKEN DOSENT LONGER EXSIST",
+        401
+      )
+    );
+  }
+  //check if user change his pass after token created
+  if (curentUser.passwordChangedAt) {
+    const passChangedTimeStamp = parseInt(
+      curentUser.passwordChangedAt.getTime() / 100,
+      10
+    );
+    if (passChangedTimeStamp > decoded.iat) {
+      return next(new AppError("user resntly changed his password", 401));
     }
-  });
-};
+  }
+  req.user = curentUser;
+  next();
+});
 
 exports.signUp = catchAsync(async (req, res, next) => {
   // console.log(req.body);
@@ -267,13 +276,21 @@ exports.signUp = catchAsync(async (req, res, next) => {
     email: req.body.email,
   });
 
-  createSendToken(newUser, 201, res);
+  const token = createtoken(newUser._id);
 
-  next();
+  res.status(201).json({ data: newUser, token });
 });
+exports.login = asyncHandler(async (req, res, next) => {
+  const User = await userModel.findOne({ userName: req.body.userName });
 
+  if (!User || !(await bcrypt.compare(req.body.password, User.password))) {
+    return next(new AppError("incorect usrName or password", 401));
+  }
 
+  const token = createtoken(User._id);
 
+  res.status(200).json({ data: User, token });
+});
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const user = await userModel.findOne({ email: req.body.email });
@@ -310,19 +327,41 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.changeUserPassword = asyncHandler(async(req, res, next) => {
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  // Get the logged-in user's ID from the JWT token
+  const userId = req.user.id;
 
-  const Document = await userModel.findByIdAndUpdate(req.params.id, {
-      password: await bcrypt.hash(req.body.password, 12),
-      passwordChangedAt: Date.now(),
+  // Find the user by ID
+  const user = await userModel.findById(userId);
 
-  }, { new: true })
-  if (!Document) {
-      return next(new AppError(`cant find this Document: ${req.params.id}`, 404))
+  if (!user) {
+    return next(new AppError("User not found", 404));
   }
-  res.status(200).json({ data: Document })
-});
 
+  // Check if the provided current password matches the stored password
+  const isCurrentPasswordValid = await bcrypt.compare(
+    req.body.currentPassword,
+    user.password
+  );
+
+  if (!isCurrentPasswordValid) {
+    return next(new AppError("Current password is incorrect", 400));
+  }
+
+  // Hash the new password
+  const newPasswordHash = await bcrypt.hash(req.body.newPassword, 12);
+
+  // Update the user's password
+  user.password = newPasswordHash;
+  user.passwordChangedAt = Date.now();
+  await user.save();
+
+  // Send a success response
+  res.status(200).json({
+    status: "success",
+    message: "Password changed successfully",
+  });
+});
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // Find user by reset token
@@ -332,7 +371,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new AppError('Invalid or expired reset token', 400));
+    return next(new AppError("Invalid or expired reset token", 400));
   }
 
   // Update password and remove reset token
@@ -341,10 +380,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save();
 
-  
-
   res.status(200).json({
-    status: 'success',
-    message: 'Password reset successful!',
+    status: "success",
+    message: "Password reset successful!",
   });
 });
