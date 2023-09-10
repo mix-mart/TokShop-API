@@ -2,6 +2,7 @@ const userModel = require("../models/userSchema");
 const users = require("../models/userSchema");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const crypto=require('crypto')
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 var admin = require("firebase-admin");
@@ -366,9 +367,13 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(req.params.token)
+    .digest('hex');
   // Find user by reset token
   const user = await userModel.findOne({
-    passwordResetToken: req.params.token,
+    passwordResetToken: req.params.hashedToken,
     passwordResetExpires: { $gt: Date.now() },
   });
 
