@@ -80,6 +80,7 @@ io.on("connection", (socket) => {
 
 // Use body-parser to retrieve the raw body as a buffer
 const bodyParser = require("body-parser");
+// app.use(bodyParser.json());
 
 //Sheduled job to run every minute to delete dead rooms
 

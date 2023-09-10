@@ -190,7 +190,7 @@ userRouter.route('/forgot-my-password').post(authController.forgotPassword)
 userRouter.route('/update/password').put( authController.protect,authController.changePassword)
 
 // Route for resetting password using the reset token
-userRouter.patch('/reset-password/:token', authController.resetPassword);
+userRouter.post('/reset-password/:token', authController.resetPassword);
 
 
 

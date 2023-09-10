@@ -302,6 +302,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
   const resetToken = await user.createPasswordResetToken();
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
   await user.save({ validateBeforeSave: false });
 
   //FIXME:
@@ -314,6 +318,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       status: "success",
       message: "reset token sent to your email",
       resetToken,
+      hashedToken,
     });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -367,13 +372,13 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(req.params.token)
-    .digest('hex');
+  // const hashedToken = crypto
+  //   .createHash('sha256')
+  //   .update(req.params.token)
+  //   .digest('hex');
   // Find user by reset token
   const user = await userModel.findOne({
-    passwordResetToken: req.params.hashedToken,
+    passwordResetToken: req.params.token,
     passwordResetExpires: { $gt: Date.now() },
   });
 
