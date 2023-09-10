@@ -8,51 +8,30 @@ module.exports = class Email {
         // this.firstname = user.user_name.split(' ')[0];
         this.firstname = user.firstName;
         this.url = url;
-        this.from = `Mix Mart <mixmart007@mix-mart.online>`;
+        this.from = `Mix Mart <info@mix-mart.online>`;
     }
 
 
 
-    // var transport = nodemailer.createTransport({
-    //     host: "live.smtp.mailtrap.io",
-    //     port: 587,
-    //     auth: {
-    //         user: "api",
-    //         pass: "859af3bc018dc4a4335e0dbdeda73556"
-    //     }
-    // });
 
-
-    // newTransport() {
-    //     return nodemailer.createTransport({
-    //         host: "sandbox.smtp.mailtrap.io",
-    //         secure: false,
-    //         port: 587,
-    //         auth: {
-    //             user: "2bc2de9bca5c41",
-    //             pass: "0cdfd27d20ce3b"
-    //         },
-    //         tls: {
-    //             rejectUnauthorized: false
-    //         }
-    //     });
-    // }
 
     newTransport() {
         return nodemailer.createTransport({
-            host: "live.smtp.mailtrap.io",
+            host: "smtp.office365.com",
             secure: false,
             port: 587,
             domain: 'mix-mart.online',
             auth: {
-                user: "api",
-                pass: "859af3bc018dc4a4335e0dbdeda73556"
+                user: "info@mix-mart.online",
+                pass: "Wac77089"
             },
-            // tls: {
-            //     rejectUnauthorized: false
-            // }
+            secureConnection: true,
+            tls: { ciphers: 'SSLv3' }
+
         });
     }
+
+
 
     async send(res, template, subject) {
         const html = pug.renderFile(
