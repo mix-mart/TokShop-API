@@ -219,7 +219,7 @@ userSchema.methods.isValidPassword = async function (password) {
   const compare = await bcrypt.compare(password, user.password);
   return compare;
 };
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   // Hashing user password
   this.password = await bcrypt.hash(this.password, 12);

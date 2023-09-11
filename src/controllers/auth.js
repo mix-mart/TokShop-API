@@ -2,7 +2,7 @@ const userModel = require("../models/userSchema");
 const users = require("../models/userSchema");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const crypto=require('crypto')
+const crypto = require('crypto')
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 var admin = require("firebase-admin");
@@ -270,6 +270,10 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
 exports.signUp = catchAsync(async (req, res, next) => {
   // console.log(req.body);
+  const user = await userModel.find({
+    userName: req.body.userName
+  })
+  if (user) return next(new AppError('you are already signed up before, go and login', 500));
   const newUser = await userModel.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
@@ -317,7 +321,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "reset token sent to your email",
-      resetToken,
+      // resetToken,
       hashedToken,
     });
   } catch (err) {
@@ -360,8 +364,8 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
 
   // Update the user's password
   user.password = req.body.newPassword;
-  
-  
+
+
   await user.save();
 
   // Send a success response
