@@ -270,7 +270,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
 exports.signUp = catchAsync(async (req, res, next) => {
   // console.log(req.body);
-  const user = await userModel.find({
+  const user = await userModel.findOne({
     userName: req.body.userName
   })
   if (user) return next(new AppError('you are already signed up before, go and login', 500));
