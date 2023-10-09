@@ -20,7 +20,7 @@ const prodPackages = new mongoose.Schema(
         required:true,
     },
     discription: String,
-    expire:{
+    validity:{
         type:Date,
         // required:[true,'expire date required']
     },
