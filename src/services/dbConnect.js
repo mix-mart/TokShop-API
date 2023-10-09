@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const options = require("../config/mongooseOptions");
 
 require("dotenv").config({ path: ".env" });
-const connect = () => {
-  mongoose
+const connect = async () => {
+  await mongoose
     .connect(process.env.MONGO_URI, options)
     .then(
       (res) => {

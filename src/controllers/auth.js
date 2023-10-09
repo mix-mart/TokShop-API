@@ -1,6 +1,7 @@
 const userModel = require("../models/userSchema");
 const users = require("../models/userSchema");
 const passport = require("passport");
+const { promisify } = require('util');
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto')
 const asyncHandler = require("express-async-handler");
@@ -233,6 +234,8 @@ exports.protect = asyncHandler(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.JWT) {
+    token = req.cookies.JWT;
   }
   if (!token) {
     return next(
@@ -241,10 +244,13 @@ exports.protect = asyncHandler(async (req, res, next) => {
   }
 
   //2:verfiy token(change happen ,expired token)
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // req.user = decoded;
+  console.log(decoded.userId)
   //2:check if user exist
   const curentUser = await userModel.findById(decoded.userId);
+  console.log(curentUser)
   if (!curentUser) {
     return next(
       new AppError(
@@ -286,6 +292,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
   res.status(201).json({ data: newUser, token });
 });
+
 exports.login = asyncHandler(async (req, res, next) => {
   const User = await userModel.findOne({ userName: req.body.userName });
 

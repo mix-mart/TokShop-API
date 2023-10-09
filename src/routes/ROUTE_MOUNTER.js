@@ -8,6 +8,7 @@ const billingRouter = require("./billing");
 const addressRouter = require("./address");
 const roomRouter = require("./roomRoutes");
 const transRouter = require("./transactions");
+const subscriptionsRouter = require('./subscriptionsRoute');
 const activityRouter = require("./activitiesRoute");
 const notificationsRouter = require("./notificationRoutes");
 const favoriteRouter = require("./favoriteRouter");
@@ -19,7 +20,7 @@ const flutterWaveRouter = require("./flutterwave");
 const importRouter = require("./import");
 const auctionRouter = require("./auction");
 const stripeRouter = require("./stripeRoute");
-const packageRouter= require("./packageRoute");
+const packageRouter = require("./packageRoute");
 
 const passport = require("passport");
 
@@ -60,6 +61,11 @@ app.use(
   "/transactions",
   passport.authenticate("jwt", { session: false }),
   transRouter
+);
+app.use(
+  "/subscriptions",
+
+  subscriptionsRouter
 );
 app.use("/activities", activityRouter);
 app.use(
