@@ -4,32 +4,30 @@ const { Schema, model } = mongoose;
 const prodPackages = new mongoose.Schema(
   {
     title: {
-        type:String,
-        required:true
-        
+      type: String,
+      required: true,
     },
     price: {
-        type:Number,
-        required:true,
+      type: Number,
+      required: true,
     },
     priceAfterDiscount: {
-        type:Number,
-        // required:true,
+      type: Number,
+      // required:true,
     },
     numberOfProducts: {
-        type:Number,
-        required:true,
+      type: Number,
+      required: true,
     },
     discription: String,
-    validity:{
-        type:Date,
-        // required:[true,'expire date required']
+    validity: {
+      type: Number,
+      // required:[true,'expire date required']
     },
-    plan:{
-        type:String,
-        enum:['free','weekly','monthly','secondary'],
-        default:'free',
-
+    plan: {
+      type: String,
+      enum: ["free", "weekly", "monthly", "secondary"],
+      default: "free",
     },
 
     userIds: [
@@ -39,44 +37,36 @@ const prodPackages = new mongoose.Schema(
         ref: "user",
       },
     ],
-
-
   },
   { timestamps: true, autoCreate: true, autoIndex: true }
 );
 
 prodPackages.pre("save", function (next) {
-  // Check if the validity field is not set or if the numberOfProducts has changed
-  if (this.plan=='free') {
-    // Calculate the validity date based on some logic
-    const currentDate = new Date();
-    // Calculate the validity date based on your requirements
-    currentDate.setDate(currentDate.getDate() + 7);
-    this.validity = currentDate
+  if (this.plan == "free") {
+    const currentDate = 7 * 24 * 60 * 60;
+    //currentDate.setDate(currentDate.getDate() + 7);
+    this.validity = currentDate;
   }
-  if (this.plan=='weekly') {
-    // Calculate the validity date based on some logic
-    const currentDate = new Date();
-    // Calculate the validity date based on your requirements
-    currentDate.setDate(currentDate.getDate() + 7);
+  if (this.plan == "weekly") {
+    // const currentDate = new Date();
+    const currentDate = 7 * 24 * 60 * 60;
+    // currentDate.setDate(currentDate.getDate() + 7);
     this.validity = currentDate;
   }
 
-  if (this.plan=='monthly') {
-    // Calculate the validity date based on some logic
-    const currentDate = new Date();
-    // Calculate the validity date based on your requirements
-    currentDate.setDate(currentDate.getDate() + 30);
+  if (this.plan == "monthly") {
+    // const currentDate = new Date();
+    const currentDate = 30 * 24 * 60 * 60;
+    // currentDate.setDate(currentDate.getDate() + 30);
     this.validity = currentDate;
   }
-  if (this.plan=='secondary') {
-    // Calculate the validity date based on some logic
-    const currentDate = new Date();
-    // Calculate the validity date based on your requirements
-    currentDate.setDate(currentDate.getDate() + 365);
-    this.validity = currentDate
+  if (this.plan == "secondary") {
+    // const currentDate = new Date();
+    const currentDate = 365 * 24 * 60 * 60;
+    // currentDate.setDate(currentDate.getDate() + 365);
+    this.validity = currentDate;
   }
-  
+
   next();
 });
 
