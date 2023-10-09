@@ -11,7 +11,7 @@ exports.createPackage=asyncHandler(async(req,res)=>{
         plan:req.body.plan,
     })
 
-    
+
 
     res.status(201).json({ success: true,data:newPackage});
 })
@@ -31,6 +31,14 @@ exports.getAllPackage=asyncHandler(async(req,res)=>{
     }
     res.status(200).json({success: true,data:packages})
 })
+exports.updatePackage=asyncHandler(async(req,res)=>{
+    const updated=await prodPackage.findByIdAndUpdate(req.params.id,req.body,
+        {new:true})
+    if(!updated){
+        return new AppError('packages not found.', 404)
+    }
+    res.status(200).json({success: true,data:updated})
+})
 
 exports.deletePackage=asyncHandler(async(req,res)=>{
     const{id}=req.params
@@ -42,6 +50,3 @@ console.log(deleted)
     res.status(200).json({success: true,deleted})
 })
 
-exports.setvalidity=asyncHandler(async(req,res)=>{
-
-})

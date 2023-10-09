@@ -8,6 +8,8 @@ Router.route("/")
 Router.route("/:id")
 .get(packages.getPackage)
 .delete(packages.deletePackage)
+.put(packages.updatePackage)
+
 
 
 
