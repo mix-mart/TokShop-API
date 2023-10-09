@@ -15,9 +15,6 @@
 - update package -
 - delete all package -
 - get all user for spcific package -
-- subscripe for spcific package -
-- unsubscripe // -
--          -
 
 ---
 
@@ -47,3 +44,20 @@
 - deduction
 - expiryDate
 - stripeBankAccount
+
+                  ##Subscription endpoints
+
+- subscribe:
+  users can subscribe to packages
+  not implemented yet:
+  stripe bank account
+  expiryDate => will implement after the package duration implementation.
+- unsubscribe:
+  users can unsubscribe to packages which will delete the transaction process ,done when subscribing, from the database.
+- renew:
+  not implemented yet => will implement after the package duration implementation.
+
+- allSubscriptions:
+  user can find all subscriptions they made.
+- allPackageSubscriptions:
+  admin can find all users subscribed to their package.

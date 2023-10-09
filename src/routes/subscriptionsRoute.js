@@ -6,8 +6,10 @@ const authController = require('../controllers/auth');
 const subscriptionsRouter = express.Router();
 
 subscriptionsRouter.use(authController.protect)
-subscriptionsRouter.route('/').post(subscriptionController.subscribe)
+subscriptionsRouter.route('/').post(subscriptionController.subscribe).get(subscriptionController.getAllPackageSubscriptions)
 subscriptionsRouter.route('/:id').delete(subscriptionController.unsubscribe)
-// subscriptionsRouter.route('/').patch(subscriptionController.renew)
+subscriptionsRouter.route('/:packageId').get(subscriptionController.getAllUserSubscriptions)
+subscriptionsRouter.route('/').patch(subscriptionController.renew)
+
 
 module.exports = subscriptionsRouter;
