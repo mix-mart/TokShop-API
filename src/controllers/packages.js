@@ -11,6 +11,8 @@ exports.createPackage=asyncHandler(async(req,res)=>{
         plan:req.body.plan,
     })
 
+    
+
     res.status(201).json({ success: true,data:newPackage});
 })
 
@@ -38,4 +40,8 @@ console.log(deleted)
         return new AppError('package not found.', 404)
     }
     res.status(200).json({success: true,deleted})
+})
+
+exports.setvalidity=asyncHandler(async(req,res)=>{
+
 })

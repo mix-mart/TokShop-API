@@ -5,6 +5,7 @@ const prodPackages = new mongoose.Schema(
   {
     title: {
         type:String,
+        required:true
         
     },
     price: {
@@ -43,6 +44,41 @@ const prodPackages = new mongoose.Schema(
   },
   { timestamps: true, autoCreate: true, autoIndex: true }
 );
+
+prodPackages.pre("save", function (next) {
+  // Check if the validity field is not set or if the numberOfProducts has changed
+  if (this.plan=='free') {
+    // Calculate the validity date based on some logic
+    const currentDate = new Date();
+    // Calculate the validity date based on your requirements
+    currentDate.setDate(currentDate.getDate() + 7);
+    this.validity = currentDate
+  }
+  if (this.plan=='weekly') {
+    // Calculate the validity date based on some logic
+    const currentDate = new Date();
+    // Calculate the validity date based on your requirements
+    currentDate.setDate(currentDate.getDate() + 7);
+    this.validity = currentDate;
+  }
+
+  if (this.plan=='monthly') {
+    // Calculate the validity date based on some logic
+    const currentDate = new Date();
+    // Calculate the validity date based on your requirements
+    currentDate.setDate(currentDate.getDate() + 30);
+    this.validity = currentDate;
+  }
+  if (this.plan=='secondary') {
+    // Calculate the validity date based on some logic
+    const currentDate = new Date();
+    // Calculate the validity date based on your requirements
+    currentDate.setDate(currentDate.getDate() + 365);
+    this.validity = currentDate
+  }
+  
+  next();
+});
 
 const prodPackage = model("prodPackage", prodPackages);
 module.exports = prodPackage;
