@@ -16,37 +16,55 @@ exports.createPackage=asyncHandler(async(req,res)=>{
     res.status(201).json({ success: true,data:newPackage});
 })
 
-exports.getPackage=asyncHandler(async(req,res)=>{
+exports.getPackage=async(req,res,next)=>{
+   try{
     const package=await prodPackage.findById({_id:req.params.id})
     if(!package){
-        return new AppError('package not found.', 404)
+        return next(new AppError('package not found.', 404)) 
     }
     res.status(200).json({ success: true,package})
-})
-exports.getAllPackage=asyncHandler(async(req,res)=>{
-    const packages =await prodPackage.find();
+   }catch(err){
+    return next(new AppError('package not found.', 404)) 
+   }
+}
+
+exports.getAllPackage=async(req,res,next)=>{
+    try{
+        const packages =await prodPackage.find();
     // console.log(packages)
     if(!packages){
-        return new AppError('packages not found.', 404)
+        return next(new AppError('packages not found.', 404)) 
     }
     res.status(200).json({success: true,data:packages})
-})
-exports.updatePackage=asyncHandler(async(req,res)=>{
+    }catch(err){
+        return next(new AppError('packages not found.', 404)) 
+    }
+}
+exports.updatePackage=async(req,res)=>{
+try{
     const updated=await prodPackage.findByIdAndUpdate(req.params.id,req.body,
         {new:true})
     if(!updated){
-        return new AppError('packages not found.', 404)
+        return next( new AppError('packages not found.', 404))
     }
     res.status(200).json({success: true,data:updated})
-})
+}catch(err){
+    return next( new AppError('packages not found.', 404))
+}
+}
 
-exports.deletePackage=asyncHandler(async(req,res)=>{
-    const{id}=req.params
-    const deleted=await prodPackage.findByIdAndDelete(id)
-console.log(deleted)
-    if(!deleted){
-        return new AppError('package not found.', 404)
+exports.deletePackage = async (req, res, next) => {
+    const { id } = req.params;
+  
+    try {
+      const deleted = await prodPackage.findByIdAndDelete(id);
+  
+      if (!deleted) {
+        return next(new AppError('Package not found.', 404));
+      }
+  
+      res.status(200).json({ success: true, deleted });
+    } catch (err) {
+      next(new AppError('Package not found.', 404)); // Pass any errors to the error-handling middleware
     }
-    res.status(200).json({success: true,deleted})
-})
-
+  };
