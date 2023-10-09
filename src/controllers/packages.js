@@ -35,7 +35,7 @@ exports.getAllPackage=async(req,res,next)=>{
     if(!packages){
         return next(new AppError('packages not found.', 404)) 
     }
-    res.status(200).json({success: true,data:packages})
+    res.status(200).json({success: true,result:packages.length,data:packages})
     }catch(err){
         return next(new AppError('packages not found.', 404)) 
     }

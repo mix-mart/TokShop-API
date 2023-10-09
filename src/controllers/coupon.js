@@ -56,7 +56,7 @@ exports.getAllcoupon = asyncHandler(async (req, res) => {
     return new AppError("no coupon exist", 404);
   }
 
-  res.status(200).json({ data: coupons });
+  res.status(200).json({result:coupons.length, data: coupons });
 });
 
 
