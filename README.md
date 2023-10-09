@@ -61,3 +61,20 @@
   user can find all subscriptions they made.
 - allPackageSubscriptions:
   admin can find all users subscribed to their package.
+
+
+
+
+
+    ------------------------------------------------
+       **coupons**    /done
+
+       _ endPoint _
+       _create
+       _update
+       _getAll
+       _getOne
+       _delete
+       _applayCoupon
+
+       -----------------------------------------
