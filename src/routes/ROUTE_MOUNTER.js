@@ -21,6 +21,7 @@ const importRouter = require("./import");
 const auctionRouter = require("./auction");
 const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
+const couponRoute=require('./couponRoute')
 
 const passport = require("passport");
 
@@ -45,6 +46,7 @@ app.use("/favorite", favoriteRouter);
 app.use("/auction", auctionRouter);
 app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
+app.use('/coupons', couponRoute);
 app.use(
   "/address",
   passport.authenticate("jwt", { session: false }),
