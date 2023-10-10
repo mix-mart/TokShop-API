@@ -6,8 +6,10 @@ const AppError = require('../utils/appError');
 
 exports.subscribe = catchAsync(async (req, res, next) => {
     // const userId = req.user.id;
-    // const package = await Package.findById(req.body.packageId);
-    // const expire = package.expire;
+    const package = await Package.findById(req.body.packageId);
+    const validity = package.validity;
+
+
     // const expiryDate = expire?expire:
     const newSub = await Subscription.create({
         packageId: req.body.packageId,
@@ -17,7 +19,7 @@ exports.subscribe = catchAsync(async (req, res, next) => {
         status: req.body.status,
         deduction: req.body.deduction,
         stripeBankAccount: req.body.stripeBankAccount,
-        expiryDate: Date.now()
+        expiryDate: new Date((Date.now() + validity * 1000))
     })
     res.status(200).json({
         status: 'success',
