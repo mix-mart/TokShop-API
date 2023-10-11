@@ -78,9 +78,9 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     const packageId = AllSubscriptions[0].packageId;
     const package = await Package.findById(packageId);
     const numberOfProducts = package.numberOfProducts;
-    const previousProducts = await Product.find({ ownerId: userId, createdAt: { $gt: lastSubscription.expiryDate } });
+    const previousProducts = await Product.find({ ownerId: userId, createdAt: { $gt: lastSubscription.createdAt } });
     const numberOfPreviousProducts = previousProducts.length;
-    if (numberOfPreviousProducts == numberOfProducts) {
+    if (numberOfPreviousProducts >= numberOfProducts) {
         return next(new AppError('You are not allowed to upload more products in that subscription, please go and upgrade your subscription or buy more credits.', 500))
     }
     console.log(AllSubscriptions);
