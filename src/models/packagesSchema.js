@@ -30,13 +30,6 @@ const prodPackages = new mongoose.Schema(
       default: "free",
     },
 
-    userIds: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: "user",
-      },
-    ],
   },
   { timestamps: true, autoCreate: true, autoIndex: true }
 );
