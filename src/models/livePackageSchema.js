@@ -17,7 +17,7 @@ const packageSchema = new Schema({
   },
   durationInMinutes: {
     type: Number,
-    required: true,
+    // required: true,
     min: [1, 'Min duration value is 1.0'],
     
   },
