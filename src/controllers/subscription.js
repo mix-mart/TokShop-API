@@ -1,6 +1,7 @@
 const Subscription = require('../models/subscriptionModel');
 const Package = require('../models/packagesSchema');
 const UserModel = require('../models/userSchema');
+const Product = require('../models/productSchema');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -74,10 +75,19 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
     const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
     const lastSubscription = AllSubscriptions[0];
+    const packageId = AllSubscriptions[0].packageId;
+    const package = await Package.findById(packageId);
+    const numberOfProducts = package.numberOfProducts;
+    const previousProducts = await Product.find({ ownerId: userId, createdAt: { $gt: lastSubscription.expiryDate } });
+    const numberOfPreviousProducts = previousProducts.length;
+    if (numberOfPreviousProducts == numberOfProducts) {
+        return next(new AppError('You are not allowed to upload more products in that subscription, please go and upgrade your subscription or buy more credits.', 500))
+    }
     console.log(AllSubscriptions);
     if (lastSubscription.expiryDate.getTime() < Date.now()) {
         return next(new AppError('Your subscription has been expired! please, go and renew you subscription.', 500))
     }
+
     // res.status(200).json(AllSubscriptions)
     next();
 
