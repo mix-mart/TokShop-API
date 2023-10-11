@@ -69,3 +69,16 @@ exports.getAllPackageSubscriptions = catchAsync(async (req, res, next) => {
         subscriptions
     })
 })
+
+exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
+    const userId = req.user.id;
+    const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
+    const lastSubscription = AllSubscriptions[0];
+    console.log(AllSubscriptions);
+    if (lastSubscription.expiryDate.getTime() < Date.now()) {
+        return next(new AppError('Your subscription has been expired! please, go and renew you subscription.', 500))
+    }
+    // res.status(200).json(AllSubscriptions)
+    next();
+
+})

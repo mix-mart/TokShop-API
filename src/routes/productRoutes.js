@@ -1,7 +1,7 @@
 const express = require("express");
 const productRouter = express.Router();
 const productController = require("../controllers/products");
-
+const subscriptionController = require('../controllers/subscription')
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
@@ -20,6 +20,7 @@ productRouter
   .route("/:shopId")
   .post(
     passport.authenticate("jwt", { session: false }),
+    subscriptionController.isSubscriptionValid,
     productController.addProductToShop
   );
 
@@ -61,7 +62,7 @@ productRouter
 productRouter
   .route("/interest/interest/products/:interest")
   .get(productController.interestProducts);
-  
+
 productRouter
   .route("/channel/products/:channel")
   .get(productController.channelProducts);
