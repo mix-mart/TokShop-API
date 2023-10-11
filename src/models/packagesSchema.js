@@ -3,7 +3,7 @@ const { Schema, model } = mongoose;
 
 const prodPackages = new mongoose.Schema(
   {
-    title: {
+    name: {
       type: String,
       required: true,
     },
@@ -29,14 +29,12 @@ const prodPackages = new mongoose.Schema(
       enum: ["free", "weekly", "monthly", "secondary"],
       default: "free",
     },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    country:String,
 
-    userIds: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: "user",
-      },
-    ],
   },
   { timestamps: true, autoCreate: true, autoIndex: true }
 );
