@@ -17,4 +17,7 @@ router.put('/:id', livePackageController.updateLivepackage);
 // Delete a package by ID
 router.delete('/:id', livePackageController.deleteLivePackages);
 
+//apply live packge coupon
+router.post('/apply', livePackageController.apllayCouponOnLivePackge);
+
 module.exports = router;

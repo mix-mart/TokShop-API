@@ -3,7 +3,7 @@ const { Schema, model } = mongoose;
 
 const prodPackages = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
     },
