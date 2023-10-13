@@ -3,6 +3,7 @@ const userModel = require("../models/userSchema");
 const interestModel = require("../models/channelSchema");
 const recordingsModel = require("../models/recordingsSchema");
 var auctionModel = require("../models/auction");
+const auctionSubscription = require('../models/auctionSubscription');
 
 const functions = require("../shared/functions");
 require("dotenv").config({ path: ".env" });
@@ -17,6 +18,7 @@ const admin = require("firebase-admin");
 var axios = require("axios");
 var mongoose = require("mongoose");
 const arrayToObjectIds = require("../shared/arrayToObjectIds");
+const { findByIdAndUpdate } = require("../models/orderSchema");
 
 exports.createRoom = async (req, res) => {
   try {
@@ -116,12 +118,12 @@ exports.createRoom = async (req, res) => {
       },
       { runValidators: true, new: true, upsert: false }
     ).populate("channel")
-        .populate({
-          path: "channel",
-          populate: {
-            path: "interests",
-          },
-        });
+      .populate({
+        path: "channel",
+        populate: {
+          path: "interests",
+        },
+      });
 
     if (req.body.channel != null) {
       await interestModel.findByIdAndUpdate(newObj.channel, {
@@ -129,36 +131,36 @@ exports.createRoom = async (req, res) => {
       });
     }
 
-/*
-    for (let i = 0; i < user.followers.length; i++) {
-      functions.saveActivity(
-        newRoom._id,
-        user.firstName + " " + user.lastName,
-        "RoomScreen",
-        false,
-        null,
-        user.followers[i]._id,
-        user.firstName + " " + user.lastName + " started a TokShow. Join?.",
-        user._id
-      );
-    }
-
-    for (let i = 0; i < req.body.hostIds.length; i++) {
-      functions.saveActivity(
-        newRoom._id,
-        user.firstName + " " + user.lastName,
-        "RoomScreen",
-        false,
-        null,
-        req.body.hostIds[i],
-        user.firstName +
-          " " +
-          user.lastName +
-          " has invited you to be a co-host in their TokShow. Join?.",
-        user._id
-      );
-    }
-*/
+    /*
+        for (let i = 0; i < user.followers.length; i++) {
+          functions.saveActivity(
+            newRoom._id,
+            user.firstName + " " + user.lastName,
+            "RoomScreen",
+            false,
+            null,
+            user.followers[i]._id,
+            user.firstName + " " + user.lastName + " started a TokShow. Join?.",
+            user._id
+          );
+        }
+    
+        for (let i = 0; i < req.body.hostIds.length; i++) {
+          functions.saveActivity(
+            newRoom._id,
+            user.firstName + " " + user.lastName,
+            "RoomScreen",
+            false,
+            null,
+            req.body.hostIds[i],
+            user.firstName +
+              " " +
+              user.lastName +
+              " has invited you to be a co-host in their TokShow. Join?.",
+            user._id
+          );
+        }
+    */
 
     let hostNotificationTokens = [];
 
@@ -180,7 +182,7 @@ exports.createRoom = async (req, res) => {
           var follower = await userModel.findOne({ _id: user.followers[i] });
 
           if (
-            follower !=null && follower["notificationToken"] != "" &&
+            follower != null && follower["notificationToken"] != "" &&
             !hostNotificationTokens.includes(follower["notificationToken"])
           ) {
             userNotificationTokens.push(follower["notificationToken"]);
@@ -218,9 +220,9 @@ exports.createRoom = async (req, res) => {
           hostNotificationTokens,
           "You've been invited",
           user.firstName +
-            " " +
-            user.lastName +
-            " has invited you to be a co-host in their TokShow. Join?.",
+          " " +
+          user.lastName +
+          " has invited you to be a co-host in their TokShow. Join?.",
           "RoomScreen",
           newRoom._id
         );
@@ -460,9 +462,9 @@ exports.createEvent = async (req, res) => {
         hostNotificationTokens,
         "You've been invited",
         user.firstName +
-          " " +
-          user.lastName +
-          " has invited you to be a co-host in their event.",
+        " " +
+        user.lastName +
+        " has invited you to be a co-host in their event.",
         "EventScreen",
         newRoom._id
       );
@@ -768,7 +770,7 @@ exports.getRoomsByUserId = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-          "muted"
+        "muted"
       ])
       .populate("speakerIds", [
         "firstName",
@@ -790,21 +792,21 @@ exports.getRoomsByUserId = async (req, res) => {
         "roomuid",
         "agorauid",
       ])
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        }).populate("channel")
-        .populate({
-          path: "activeauction",
-          populate: {
-            path: "winner",
-          },
-        })
+        },
+      }).populate("channel")
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "winner",
+        },
+      })
       .populate({
         path: "productIds",
         populate: {
@@ -869,7 +871,7 @@ exports.getRoomsByUserId = async (req, res) => {
 
 exports.getActiveTokshows = async (req, res) => {
   try {
-    const { title, page, limit, userid, channel,event } = req.query;
+    const { title, page, limit, userid, channel, event } = req.query;
 
     const queryObject = {};
 
@@ -886,7 +888,7 @@ exports.getActiveTokshows = async (req, res) => {
     queryObject.$or = [
       {
         roomType: "public",
-        event: event ??  false,
+        event: event ?? false,
         ended: false,
       },
     ];
@@ -1142,7 +1144,7 @@ exports.getMyEvents = async (req, res) => {
         "userName",
         "email",
         "profilePhoto",
-          "muted"
+        "muted"
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1202,15 +1204,15 @@ exports.getMyEvents = async (req, res) => {
 };
 
 exports.sendRoomNotifications = async (req, res) => {
-	console.log("sendRoomNotifications");
-	console.log(req.body);
-  if(req.body.type == "liveposted"){
-	  functions.sendNotificationToAll({
+  console.log("sendRoomNotifications");
+  console.log(req.body);
+  if (req.body.type == "liveposted") {
+    functions.sendNotificationToAll({
       included_segments: ["Subscribed Users"],
-      data: { screen: "RoomScreen", id: req.body.room._id},
-      headings: { en:`Join ${req.body.streamtypetype} Live TokShow by ${req.body.user.firstName}` },
+      data: { screen: "RoomScreen", id: req.body.room._id },
+      headings: { en: `Join ${req.body.streamtypetype} Live TokShow by ${req.body.user.firstName}` },
       contents: {
-        en:` ${req.body.user.firstName} is live on ${req.body.streamtypetype} talking about ${req.body.room.productIds[0].name} click here to join watch.`,
+        en: ` ${req.body.user.firstName} is live on ${req.body.streamtypetype} talking about ${req.body.room.productIds[0].name} click here to join watch.`,
       },
     });
   }
@@ -1229,17 +1231,17 @@ exports.sendRoomNotifications = async (req, res) => {
           [user.notificationToken],
           userdata.firstName + " is live!",
           userdata.firstName +
-            " is live talking about `" +
-            req.body.room.productIds[0].name +
-            "`. join them.",
+          " is live talking about `" +
+          req.body.room.productIds[0].name +
+          "`. join them.",
           "RoomScreen",
           req.body.room._id
         );
       }
     });
-    
-    
-    
+
+
+
 
 
     let respnse = await roomsModel
@@ -1281,7 +1283,7 @@ exports.sendRoomNotifications = async (req, res) => {
         "userName",
         "email",
         "profilePhoto",
-          "muted"
+        "muted"
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1354,21 +1356,21 @@ exports.updateRoomById = async (req, res) => {
         "roomuid",
         "agorauid",
       ])
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        })
-        .populate({
-          path: "activeauction",
-          populate: {
-            path: "winner",
-          },
-        })
+        },
+      })
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "winner",
+        },
+      })
       .populate("userIds", [
         "firstName",
         "lastName",
@@ -1392,7 +1394,7 @@ exports.updateRoomById = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-          "muted"
+        "muted"
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1565,27 +1567,27 @@ exports.removeUserFromRoom = async (req, res) => {
       },
       { runValidators: true, new: true, upsert: false }
     );
-    
-    if(req.body.speakerIds){
 
-	    await roomsModel.findByIdAndUpdate(
-	      req.params.roomId,
-	      {
-	        $pullAll: { allUsers: req.body.speakerIds },
-	      },
-	      { runValidators: true, new: true, upsert: false }
-	    );
+    if (req.body.speakerIds) {
+
+      await roomsModel.findByIdAndUpdate(
+        req.params.roomId,
+        {
+          $pullAll: { allUsers: req.body.speakerIds },
+        },
+        { runValidators: true, new: true, upsert: false }
+      );
     }
-if(req.body.raisedHands){
+    if (req.body.raisedHands) {
 
-    await roomsModel.findByIdAndUpdate(
-      req.params.roomId,
-      {
-        $pullAll: { allUsers: req.body.raisedHands },
-      },
-      { runValidators: true, new: true, upsert: false }
-    );
- }
+      await roomsModel.findByIdAndUpdate(
+        req.params.roomId,
+        {
+          $pullAll: { allUsers: req.body.raisedHands },
+        },
+        { runValidators: true, new: true, upsert: false }
+      );
+    }
     await roomsModel.findByIdAndUpdate(
       req.params.roomId,
       {
@@ -1807,7 +1809,7 @@ exports.getEventById = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-          "muted"
+        "muted"
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1918,21 +1920,21 @@ exports.getRoomById = async (req, res) => {
         "agorauid",
         "muted",
       ])
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        })
-        .populate({
-          path: "activeauction",
-          populate: {
-            path: "winner",
-          },
-        })
+        },
+      })
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "winner",
+        },
+      })
       .populate("speakerIds", [
         "firstName",
         "lastName",
@@ -1947,7 +1949,7 @@ exports.getRoomById = async (req, res) => {
         "roomuid",
         "agorauid",
         "muted",
-      ]) 
+      ])
       .populate({
         path: "activeauction",
         populate: {
@@ -1975,15 +1977,15 @@ exports.getRoomById = async (req, res) => {
           },
         },
       })
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        })
+        },
+      })
       .populate({
         path: "activeauction",
         populate: {
@@ -2015,15 +2017,15 @@ exports.getRoomById = async (req, res) => {
           },
         },
       })
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        })
+        },
+      })
       .populate({
         path: "activeauction",
         populate: {
@@ -2078,12 +2080,12 @@ exports.getRoomById = async (req, res) => {
           path: "address",
         },
       }).populate("channel")
-        .populate({
-          path: "channel",
-          populate: {
-            path: "interests",
-          },
-        });
+      .populate({
+        path: "channel",
+        populate: {
+          path: "interests",
+        },
+      });
 
     res.status(200).setHeader("Content-Type", "application/json").json(room);
   } catch (error) {
@@ -2126,21 +2128,21 @@ exports.getDeletedRoomById = async (req, res) => {
         "roomuid",
         "agorauid",
       ])
-        .populate({
-          path: "activeauction",
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "bids",
           populate: {
-            path: "bids",
-            populate: {
-              path: "user",
-            },
+            path: "user",
           },
-        })
-        .populate({
-          path: "activeauction",
-          populate: {
-            path: "winner",
-          },
-        })
+        },
+      })
+      .populate({
+        path: "activeauction",
+        populate: {
+          path: "winner",
+        },
+      })
       .populate("raisedHands", [
         "firstName",
         "lastName",
@@ -2232,7 +2234,7 @@ exports.stopRecording = async (req, res) => {
   let AppId = settingsresponse["agoraAppID"];
 
   let authorizationHeader =
-    "Basic " + Buffer.from(plainCredentials).toString("base64"); 
+    "Basic " + Buffer.from(plainCredentials).toString("base64");
   const headers = {
     "Content-Type": "application/json;charset=utf-8",
     Authorization: authorizationHeader,
@@ -2254,6 +2256,9 @@ exports.stopRecording = async (req, res) => {
 
   console.log(clientRequest);
 
+  // Capture the start time from the request body
+  const startTime = new Date(req.body.startTime); // Assuming you sent the start time when recording began
+
   let url = `http://api.agora.io/v1/apps/${AppId}/cloud_recording/resourceid/${resourceid}/sid/${sid}/mode/mix/stop`;
 
   console.log("url", url);
@@ -2262,8 +2267,14 @@ exports.stopRecording = async (req, res) => {
       headers: headers,
     })
     .then(async (response) => {
-//       console.log({ success: true, message: response.data });
-//       res.json({ success: true, message: response.data });
+      //       console.log({ success: true, message: response.data });
+      //       res.json({ success: true, message: response.data });
+
+      // Calculate the duration when recording is stopped
+      const endTime = new Date();
+      const durationInSeconds = (endTime - startTime) / 1000; // Duration in seconds
+
+      console.log("Recording duration (seconds):", durationInSeconds);
       let newRecording = {
         userId: req.body.userId,
         roomId: req.body.channelname,
@@ -2271,16 +2282,25 @@ exports.stopRecording = async (req, res) => {
         sid: sid,
         fileList: sid + "_" + req.body.channelname + ".m3u8",
         date: Date.now(),
+        durationInSeconds
       };
 
+      //update the subscription in database.
+      const AllSubscriptions = await auctionSubscription.find({ userId: req.body.userId }).sort({ createdAt: -1 });
+      const lastSubscription = AllSubscriptions[0];
+      const usedMinutes = lastSubscription.durationInSeconds / 60;
+      const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription._id, { usedMinutes })
       try {
         await recordingsModel.create(newRecording);
         res
           .status(200)
           .setHeader("Content-Type", "application/json")
-          .json({ success: true, recording: response.data });
+          .json({
+            success: true, recording: response.data,
+            updatedSubscription: updatedUsedMinutes
+          });
       } catch (e) {
-      console.log("error. saving" + e);
+        console.log("error. saving" + e);
       }
     })
     .catch((error) => {
@@ -2289,7 +2309,7 @@ exports.stopRecording = async (req, res) => {
     });
 };
 
-startRecording = async (resourceid, uid, channelname, token) => {
+const startRecording = async (resourceid, uid, channelname, token) => {
   var settingsresponse = await functions.getSettings();
 
   let plainCredentials =
@@ -2385,6 +2405,12 @@ exports.recordRoom = async (req, res) => {
   let token = req.body.token;
   let toSubscribeVideoUids = req.body.toSubscribeVideoUids;
 
+  // Calculate the time of the live after it ends.
+
+  // Capture the start time when recording begins
+  const startTime = new Date();
+
+
   let url = `https://api.agora.io/v1/apps/${AppId}/cloud_recording/acquire`;
   console.log(url);
   axios
@@ -2403,7 +2429,7 @@ exports.recordRoom = async (req, res) => {
       }
     )
     .then(async (response) => {
-	    
+
       let reee = await startRecording(
         response.data.resourceId,
         uid,
@@ -2411,7 +2437,7 @@ exports.recordRoom = async (req, res) => {
         token
       );
       console.log("response", response.data);
-//       console.log("reee", reee);
+      //       console.log("reee", reee);
 
       let saved = await roomsModel
         .findByIdAndUpdate(
@@ -2536,7 +2562,10 @@ exports.recordRoom = async (req, res) => {
           "agorauid",
         ]);
 
-      res.json(saved);
+      res.json({
+        startTime
+        , saved
+      });
     })
     .catch((error) => {
       console.log("error", error);
@@ -2561,13 +2590,13 @@ exports.deleteRoomById = async (req, res) => {
         }
       );
     }
-    
-    if(updatedRoom.activeauction){
-	    await auctionModel.findByIdAndUpdate(updatedRoom._id, {
-	      $set: {
-	        ended: true
-	      },
-	    });
+
+    if (updatedRoom.activeauction) {
+      await auctionModel.findByIdAndUpdate(updatedRoom._id, {
+        $set: {
+          ended: true
+        },
+      });
     }
 
     res

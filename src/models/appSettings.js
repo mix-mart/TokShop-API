@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const AppSettingsSchema = mongoose.Schema({
   agoraAppID: {
     type: String,
-    default: "",
+    default: "eaa1810d9a4a477d97053548a5ef7819",
   },
   agoraAppRecordKey: {
     type: String,

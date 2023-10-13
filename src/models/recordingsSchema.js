@@ -27,6 +27,10 @@ const RecordingsSchema = mongoose.Schema({
     date: {
         type: Number,
         default: 0
+    },
+    durationInSeconds: {
+        type: Number,
+        default: 0
     }
 })
 
