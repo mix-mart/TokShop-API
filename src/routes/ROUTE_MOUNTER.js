@@ -23,6 +23,7 @@ const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
 const couponRoute=require('./couponRoute')
 const livePackageRouter=require('./livePackgesRoute')
+const uploadVideoRoute=require('./uploadVideoRoute')
 
 
 const passport = require("passport");
@@ -50,6 +51,8 @@ app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
 app.use("/livePackges", livePackageRouter);
+app.use("/viedo", uploadVideoRoute);
+
 app.use(
   "/address",
   passport.authenticate("jwt", { session: false }),
