@@ -27,18 +27,8 @@ router.post('/upload', upload.single('video'), async (req, res) => {
   if (req.file) {
     console.log(req.file)
     console.log('File uploaded:', req.file.originalname);
-    // const sanitizedFileName = req.file.originalname.replace(/ /g, '.');
     const filePath = path.join(__dirname,'../../uploads', req.file.filename);
-    console.log(filePath)
-
-    try {
-      const duration = await videoDuration(filePath);
-      console.log('Video duration:', duration, 'seconds');
-      res.json({ message: 'File uploaded successfully', duration });
-    } catch (err) {
-      console.error('Error while extracting video duration:', err);
-      res.status(500).json({ message: 'Error while extracting video duration' });
-    }
+  
   } else {
     // Handle if the file upload fails
     res.status(400).json({ message: 'File upload failed' });
@@ -114,3 +104,15 @@ router.get('/:filename', (req, res) => {
   });
 
 module.exports = router;
+
+
+
+
+//try {
+  //   const duration = await videoDuration(filePath);
+  //   console.log('Video duration:', duration, 'seconds');
+  //   res.json({ message: 'File uploaded successfully', duration });
+  // } catch (err) {
+  //   console.error('Error while extracting video duration:', err);
+  //   res.status(500).json({ message: 'Error while extracting video duration' });
+  // }

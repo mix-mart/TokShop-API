@@ -1,5 +1,9 @@
 const express = require('express');
 const livePackges=require("../models/livePackageSchema");
+const auctionSubscription = require('../models/auctionSubscription');
+const asyncHandler = require('express-async-handler');
+const AppError = require('../utils/appError');
+const couponModel=require('../models/couponSchema')
 
 
 exports.createLivePackage=async (req, res) => {
@@ -58,3 +62,33 @@ exports.createLivePackage=async (req, res) => {
       res.status(400).json({ error: error.message });
     }
   };
+
+  exports.apllayCouponOnLivePackge= asyncHandler(async (req, res, next) => {
+    // 1) Get coupon based on coupon name
+    const coupon = await couponModel.findOne({
+      name: req.body.coupon,
+      expire: { $gt: Date.now() },
+    });
+ 
+    if (!coupon) {
+      return next(new AppError(`Coupon is invalid or expired`));
+    }
+  
+    // 2) Get package to get total package price
+    const Package = await auctionSubscription.findById(req.body.liveSubId );
+ 
+    const totalPrice = Package.totalPrice;
+  
+    // 3) Calculate price after priceAfterDiscount
+    const totalPriceAfterDiscount = (
+      totalPrice -
+      (totalPrice * coupon.discount) / 100
+    ).toFixed(2); // 99.23
+    Package.totalPriceAfterDiscount = totalPriceAfterDiscount;
+    await Package.save();
+  
+    res.status(200).json({
+      status: 'success',
+      data: Package,
+    });
+  });

@@ -12,7 +12,7 @@ const auctionSubscriptionSchema = new Schema(
         packageId: {
             type: Schema.Types.ObjectId,
             required: true,
-            ref: "prodPackage",
+            ref: "Package",
         },
         details: {
             type: String,
@@ -51,11 +51,12 @@ const auctionSubscriptionSchema = new Schema(
         totalPrice: {
             type: Number,
             required: [true, 'the subscription must contain total price.']
-        }
+        },
+        totalPriceAfterDiscount:Number,
     },
     { timestamps: true, autoIndex: true, autoCreate: true }
 );
 
 const auctionSubscription = model("AuctionSubscription", auctionSubscriptionSchema);
 
-module.exports = Subscription
+module.exports = auctionSubscription
