@@ -51,7 +51,7 @@ app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
 app.use("/livePackges", livePackageRouter);
-app.use("/viedo", uploadVideoRoute);
+app.use("/videos", uploadVideoRoute);
 
 app.use(
   "/address",
