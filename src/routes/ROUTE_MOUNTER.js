@@ -21,9 +21,11 @@ const importRouter = require("./import");
 const auctionRouter = require("./auction");
 const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
-const couponRoute=require('./couponRoute')
-const livePackageRouter=require('./livePackgesRoute')
-const uploadVideoRoute=require('./uploadVideoRoute')
+const livePackageRouter = require('./livePackgesRoute')
+const coordinatesRouter = require('./coordinatesRoute');
+const couponRoute = require('./couponRoute')
+const livePackageRouter = require('./livePackgesRoute')
+const uploadVideoRoute = require('./uploadVideoRoute')
 
 
 const passport = require("passport");
@@ -87,4 +89,9 @@ app.use(
   passport.authenticate("jwt", { session: false }),
   recordingRouter
 );
+
+app.use("/coordinates",
+  passport.authenticate("jwt", { session: false }),
+  coordinatesRouter
+)
 

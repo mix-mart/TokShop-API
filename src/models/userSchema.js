@@ -184,6 +184,18 @@ const userSchema = new Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    coordinates: {
+      latitude: {
+        type: String,
+        required: true,
+        default: 30.033333
+      },
+      longitude: {
+        type: String,
+        required: true,
+        default: 31.233334
+      }
+    }
   },
   {
     timestamps: true,
