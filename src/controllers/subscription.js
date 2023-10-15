@@ -74,6 +74,7 @@ exports.getAllPackageSubscriptions = catchAsync(async (req, res, next) => {
 exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
     const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
+    console.log(AllSubscriptions)
     const lastSubscription = AllSubscriptions[0];
     const packageId = AllSubscriptions[0].packageId;
     const package = await Package.findById(packageId);
