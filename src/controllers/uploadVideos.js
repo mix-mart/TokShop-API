@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const Video = require('../models/uplodedVideoSchema');
-
+const fs = require("fs");
 // Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -31,6 +31,7 @@ exports.uploadVideo = async (req, res) => {
       message: 'File uploaded successfully',
       video: video,
     });
+    fs.unlinkSync(req.file.path);
   } catch (error) {
     console.error('Error while uploading video:', error);
     res.status(500).json({ message: 'Error while uploading video' });
@@ -59,12 +60,16 @@ exports.deleteVideo = async (req, res) => {
     }
 
     // Delete the video from Cloudinary
-    await cloudinary.uploader.destroy(publicId);
+    const deleteResponse = await cloudinary.uploader.destroy(publicId);
 
-    // Delete the video record from your database
-    await video.remove();
-
-    res.status(200).json({ message: 'Video deleted successfully' });
+    if (deleteResponse.result === 'ok') {
+      // Delete the video record from your database
+      await video.remove();
+      res.status(200).json({ message: 'Video deleted successfully' });
+    } else {
+      console.error('Error deleting video from Cloudinary');
+      res.status(500).json({ message: 'Error while deleting video from Cloudinary' });
+    }
   } catch (error) {
     console.error('Error while deleting video:', error);
     res.status(500).json({ message: 'Error while deleting video' });

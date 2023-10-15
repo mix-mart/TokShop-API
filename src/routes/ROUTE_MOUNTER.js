@@ -21,7 +21,6 @@ const importRouter = require("./import");
 const auctionRouter = require("./auction");
 const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
-const livePackageRouter = require('./livePackgesRoute')
 const coordinatesRouter = require('./coordinatesRoute');
 const couponRoute = require('./couponRoute')
 const livePackageRouter = require('./livePackgesRoute')
