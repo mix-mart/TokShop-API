@@ -2256,8 +2256,7 @@ exports.stopRecording = async (req, res) => {
 
   console.log(clientRequest);
 
-  // Capture the start time from the request body
-  const startTime = new Date(req.body.startTime); // Assuming you sent the start time when recording began
+
 
   let url = `http://api.agora.io/v1/apps/${AppId}/cloud_recording/resourceid/${resourceid}/sid/${sid}/mode/mix/stop`;
 
@@ -2270,11 +2269,9 @@ exports.stopRecording = async (req, res) => {
       //       console.log({ success: true, message: response.data });
       //       res.json({ success: true, message: response.data });
 
-      // Calculate the duration when recording is stopped
-      const endTime = new Date();
-      const durationInSeconds = (endTime - startTime) / 1000; // Duration in seconds
+      // // Calculate the duration when recording is stopped
 
-      console.log("Recording duration (seconds):", durationInSeconds);
+      // console.log("Recording duration (seconds):", durationInSeconds);
       let newRecording = {
         userId: req.body.userId,
         roomId: req.body.channelname,
@@ -2282,22 +2279,17 @@ exports.stopRecording = async (req, res) => {
         sid: sid,
         fileList: sid + "_" + req.body.channelname + ".m3u8",
         date: Date.now(),
-        durationInSeconds
+        // durationInSeconds
       };
 
-      //update the subscription in database.
-      const AllSubscriptions = await auctionSubscription.find({ userId: req.body.userId }).sort({ createdAt: -1 });
-      const lastSubscription = AllSubscriptions[0];
-      const usedMinutes = lastSubscription.durationInSeconds / 60;
-      const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription._id, { usedMinutes })
+
       try {
         await recordingsModel.create(newRecording);
         res
           .status(200)
           .setHeader("Content-Type", "application/json")
           .json({
-            success: true, recording: response.data,
-            updatedSubscription: updatedUsedMinutes
+            success: true, recording: response.data
           });
       } catch (e) {
         console.log("error. saving" + e);
@@ -2308,7 +2300,25 @@ exports.stopRecording = async (req, res) => {
       res.json({ success: false, message: error });
     });
 };
+exports.updateSubMinutes = async (req, res, next) => {
+  // Capture the start time from the request body
+  const startTime = new Date(req.body.startTime); // Assuming you sent the start time when recording began
+  const endTime = new Date(req.body.endTime);
+  const durationInSeconds = (endTime - startTime) / 1000; // Duration in seconds
 
+
+  //update the subscription in database.
+  const AllSubscriptions = await auctionSubscription.find({ userId: req.body.userId }).sort({ createdAt: -1 });
+  const lastSubscription = AllSubscriptions[0];
+  const usedMinutes = lastSubscription.durationInSeconds / 60;
+  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription._id, { usedMinutes })
+
+  res.status(200).setHeader("Content-Type", "application/json").json({
+    status: 'success',
+    updatedSubscription: updatedUsedMinutes
+  })
+
+}
 const startRecording = async (resourceid, uid, channelname, token) => {
   var settingsresponse = await functions.getSettings();
 

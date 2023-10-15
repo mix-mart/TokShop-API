@@ -9,6 +9,7 @@ const addressRouter = require("./address");
 const roomRouter = require("./roomRoutes");
 const transRouter = require("./transactions");
 const subscriptionsRouter = require('./subscriptionsRoute');
+const auctionSubscriptionRouter = require('./auctionSubscription');
 const activityRouter = require("./activitiesRoute");
 const notificationsRouter = require("./notificationRoutes");
 const favoriteRouter = require("./favoriteRouter");
@@ -23,7 +24,7 @@ const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
 const coordinatesRouter = require('./coordinatesRoute');
 const couponRoute = require('./couponRoute')
-const livePackageRouter = require('./livePackgesRoute')
+
 const uploadVideoRoute = require('./uploadVideoRoute')
 
 
@@ -75,6 +76,11 @@ app.use(
   "/subscriptions",
 
   subscriptionsRouter
+);
+app.use(
+  "/auction-subscriptions",
+
+  auctionSubscriptionRouter
 );
 app.use("/activities", activityRouter);
 app.use(

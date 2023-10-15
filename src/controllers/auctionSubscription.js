@@ -8,7 +8,7 @@ const AppError = require('../utils/appError');
 exports.subscribe = catchAsync(async (req, res, next) => {
     // const userId = req.user.id;
     const package = await LivePackage.findById(req.body.packageId);
-    const validity = package.validity;
+    // const validity = package.validity;
     const totalPrice = req.body.numberOfMinutes * package.minutePrice;
 
     const newSub = await auctionSubscription.create({
