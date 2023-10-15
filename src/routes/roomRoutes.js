@@ -39,6 +39,8 @@ roomRouter.route("/ended/:roomId").get(roomController.getDeletedRoomById);
 
 roomRouter.route("/stoprecording/:sid").post(roomController.stopRecording);
 
+roomRouter.route("/update-subscription-minutes").patch(roomController.updateSubMinutes)
+
 roomRouter.route("/record/:channelname").post(roomController.recordRoom);
 
 roomRouter.route("/get/all/:userId").get(roomController.getRoomsByUserId);
@@ -103,12 +105,12 @@ roomRouter.route("/remove/featured").put(roomController.removeFeaturedProduct);
 roomRouter
   .route("/rooms/product/:roomid")
   .put(roomController.removeProductFromroom);
-  
+
 //events
-  
+
 roomRouter.route("/event/:roomId").get(roomController.getEventById);
 roomRouter.route("/myevents/:userId").get(roomController.getMyEvents);
 roomRouter.route("/events/:id").get(roomController.getAllEvents); //to be removed
-roomRouter.route("/allevents").get(roomController.getAllEvents); 
+roomRouter.route("/allevents").get(roomController.getAllEvents);
 
 module.exports = roomRouter;
