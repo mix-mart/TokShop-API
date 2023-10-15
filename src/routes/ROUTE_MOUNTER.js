@@ -22,6 +22,7 @@ const importRouter = require("./import");
 const auctionRouter = require("./auction");
 const stripeRouter = require("./stripeRoute");
 const packageRouter = require("./packageRoute");
+const LivePackageRouter = require('./livePackgesRoute')
 const coordinatesRouter = require('./coordinatesRoute');
 const couponRoute = require('./couponRoute')
 
@@ -52,7 +53,7 @@ app.use("/auction", auctionRouter);
 app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
-app.use("/livePackges", livePackageRouter);
+app.use("/livePackges", LivePackageRouter);
 app.use("/videos", uploadVideoRoute);
 
 app.use(
