@@ -2309,9 +2309,10 @@ exports.updateSubMinutes = async (req, res, next) => {
 
   //update the subscription in database.
   const AllSubscriptions = await auctionSubscription.find({ userId: req.body.userId }).sort({ createdAt: -1 });
+  console.log(AllSubscriptions)
   const lastSubscription = AllSubscriptions[0];
-  const usedMinutes = lastSubscription.durationInSeconds / 60;
-  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription._id, { usedMinutes })
+  const usedMinutes = durationInSeconds / 60;
+  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription._id, { "$inc": { "usedMinutes": usedMinutes } }, { new: true })
 
   res.status(200).setHeader("Content-Type", "application/json").json({
     status: 'success',
