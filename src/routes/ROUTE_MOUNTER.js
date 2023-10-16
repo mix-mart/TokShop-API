@@ -97,7 +97,7 @@ app.use(
 );
 
 app.use("/coordinates",
-  passport.authenticate("jwt", { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   coordinatesRouter
 )
 
