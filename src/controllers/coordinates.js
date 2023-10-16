@@ -9,7 +9,7 @@ exports.updateUserCoordinates = catchAsync(async (req, res, next) => {
     if (!longitude || !latitude) {
         return next(new AppError("you must provide both longitude and latitude.", 500))
     }
-    const updatedUser = await UserModel.findByIdAndUpdate(userId, { coordinates: { longitude, latitude } });
+    const updatedUser = await UserModel.findByIdAndUpdate(userId, { coordinates: { longitude, latitude } }, { new: true });
     res.status(200).json({
         status: 'success',
         data: {
