@@ -76,6 +76,8 @@ const productSchema = new Schema(
       type: String,
       default: "tokshop",
     },
+    videoUrlWithSAS:String,
+    blobName:String,
   },
   { timestamps: true, autoIndex: true, autoCreate: true }
 );
