@@ -2387,7 +2387,7 @@ const startRecording = async (resourceid, uid, channelname, token) => {
         },
       },
       storageConfig: {
-        vendor: 1,
+        vendor: 5,
         region: 0,
         bucket: `auctoinvideos/${channelname}`,
         accessKey: "auctionzone",
