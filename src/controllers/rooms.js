@@ -512,6 +512,7 @@ exports.generateagoratoken = async (req, res) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
     var response = await functions.getSettings();
+    console.log(response);
     const token = RtmTokenBuilder.buildToken(
       response["agoraAppID"],
       response["AGORA_CERT"],
@@ -2246,7 +2247,7 @@ exports.stopRecording = async (req, res) => {
   let sid = req.params.sid;
   let resourceid = req.body.resourceid;
   let uid = req.body.recordingUid;
-
+  let channelname = req.body.channelname;
   var clientRequest = {
     cname: req.body.channelname,
     uid: uid,
@@ -2269,6 +2270,32 @@ exports.stopRecording = async (req, res) => {
     .then(async (response) => {
       //       console.log({ success: true, message: response.data });
       //       res.json({ success: true, message: response.data });
+      // Now, fetch the recording information, including the URL
+
+
+      // Make a GET request to fetch the recording information
+      // After starting recording, you can now store the Agora recording in Azure Blob Storage
+      const agoraRecordingUrl = `http://api.agora.io/v1/apps/${AppId}/cloud_recording/resourceid/${resourceid}/sid/${sid}/mode/mix/query`; // Replace with the actual Agora recording URL
+      const azureStorageAccountName = "auctionzone";
+      const azureStorageAccountKey = "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
+      const azureContainerName = "auctoinvideos";
+
+      const sharedKeyCredential = new StorageSharedKeyCredential(azureStorageAccountName, azureStorageAccountKey);
+      const blobServiceClient = new BlobServiceClient(`https://${azureStorageAccountName}.blob.core.windows.net`, sharedKeyCredential);
+      const containerClient = blobServiceClient.getContainerClient(azureContainerName);
+
+      try {
+        const response = await axios.get(agoraRecordingUrl, { responseType: "arraybuffer" });
+        const recordingData = response.data;
+
+        const blobName = `${channelname}_recording.mp4`; // Customize the blob name as needed
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        const uploadResponse = await blockBlobClient.upload(recordingData, recordingData.length);
+
+        console.log("File uploaded to Azure Blob Storage successfully.");
+      } catch (error) {
+        console.error("Error uploading file to Azure Blob Storage:", error);
+      }
 
       // // Calculate the duration when recording is stopped
 
@@ -2344,6 +2371,7 @@ const startRecording = async (resourceid, uid, channelname, token) => {
         "channelType": 0,
         "streamTypes": 2,
         "audioProfile": 1,
+        "videoStreamType": 0,
         "maxIdleTime": 45,
         "transcodingConfig": {
           "width": 360,
@@ -2359,15 +2387,50 @@ const startRecording = async (resourceid, uid, channelname, token) => {
         },
       },
       storageConfig: {
-        vendor: vendor,
-        region: region,
-        bucket: bucket,
-        accessKey: bucketAccessKey,
-        secretKey: bucketSecretKey,
+        vendor: 5,
+        region: 0,
+        bucket: `auctoinvideos/${channelname}`,
+        accessKey: "ZJ7BqXvn8AsvRZ0Yd26/8tdpjOrEr1rHo9mIzuKGx3c4yfKrYE3TAIWdd+DCxjs6LhUBG6qD3rZp+ASteEIYfg==",
+        // secretKey: bucketSecretKey,
       },
     },
   };
-
+  /*
+  {
+     
+     DefaultEndpointsProtocol=https;AccountName=auctionzone;AccountKey=ZJ7BqXvn8AsvRZ0Yd26/8tdpjOrEr1rHo9mIzuKGx3c4yfKrYE3TAIWdd+DCxjs6LhUBG6qD3rZp+ASteEIYfg==;EndpointSuffix=core.windows.net
+     
+      "clientRequest": {
+          
+          "recordingConfig": {
+              "maxIdleTime": 30,
+              "streamTypes": 2,
+              "channelType": 0,
+              "videoStreamType": 0,
+              "subscribeVideoUids": [
+                  "123",
+                  "456"
+              ],
+              "subscribeAudioUids": [
+                  "123",
+                  "456"
+              ],
+              "subscribeUidGroup": 0
+          },
+          "storageConfig": {
+              "accessKey": "xxxxxxf",
+              "region": 3,
+              "bucket": "xxxxx",
+              "secretKey": "xxxxx",
+              "vendor": 2,
+              "fileNamePrefix": [
+                  "directory1",
+                  "directory2"
+              ]
+          }
+      }
+  }
+  */
   console.log(clientRequest);
 
   let authorizationHeader =
@@ -2393,7 +2456,60 @@ const startRecording = async (resourceid, uid, channelname, token) => {
       console.log("error", error);
     });
 };
+/*
+ startRecording = async (resourceId, channelName, idsToUse) => {
+        let startDateTime = Date.now();
+        console.log("Total ID USER MAP Time = " + (Date.now() - startDateTime) / 1000);
+        try {
+            const request = {
+                uid: '999',
+                cname: `${channelName}`,
+                clientRequest: {
+                    token: EventService.getRecordingToken(channelName),//tocken of 999
+                    recordingConfig: {
+                        maxIdleTime: 120,
+                        streamTypes: 2,
+                        channelType: 0,
+                        videoStreamType: 0,
+                        subscribeVideoUids: [idsToUse.uId + ""],
+                        subscribeAudioUids: [idsToUse.uId + ""],
+                        subscribeUidGroup: 0
+                    },
+                    recordingFileConfig: {
+                        avFileType: ["hls"]
+                    },
+                    storageConfig: {
+                        accessKey: "ACCESS KEY",
+                        region: 0,//The region parameter has no effect, whether or not it is set.(Ref:https://docs.agora.io/en/cloud-recording/cloud_recording_api_rest?platform=RESTful)
+                        bucket: `azure-recordings/${channelName}`,
+                        secretKey: "SECRET KEY",
+                        vendor: 5
+                    }
+                }
+            };
+            console.log("agoraApiCallConfig", agoraApiCallConfig);
+            console.log("req", request);
+            const requestUrl = `${AgoraBaseUrl}/v1/apps/${AgoraAppID}/cloud_recording/resourceid/${resourceId}/mode/individual/start`;
+            const start = Date.now();
+            console.log("req--", requestUrl);
+            const response = await axios.post(requestUrl, request, agoraApiCallConfig);
 
+            const stop = Date.now();
+            const elapsed = stop - start;
+
+            //console.log("Total Start Recording Time = " + elapsed / 1000);
+            console.log("response.data", response.data);
+            if (response.status == 200 || response.status == 201) {
+                return response.data;
+            }
+            log(response.data, "error");
+            throw Error("Recording starting failed with status code: " + response.status);
+        } catch (e) {
+            appInsightLogHelper.trackException(e, 4);
+            throw e;
+        }
+    };
+*/
 exports.recordRoom = async (req, res) => {
   var settingsresponse = await functions.getSettings();
   console.log("settingsresponse", settingsresponse);
@@ -2452,28 +2568,28 @@ exports.recordRoom = async (req, res) => {
       //       console.log("reee", reee);
 
 
-      // After starting recording, you can now store the Agora recording in Azure Blob Storage
-      const agoraRecordingUrl = uid; // Replace with the actual Agora recording URL
-      const azureStorageAccountName = "auctionzone";
-      const azureStorageAccountKey = "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
-      const azureContainerName = "auctoinvideos";
+      // // After starting recording, you can now store the Agora recording in Azure Blob Storage
+      // const agoraRecordingUrl = url; // Replace with the actual Agora recording URL
+      // const azureStorageAccountName = "auctionzone";
+      // const azureStorageAccountKey = "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
+      // const azureContainerName = "auctoinvideos";
 
-      const sharedKeyCredential = new StorageSharedKeyCredential(azureStorageAccountName, azureStorageAccountKey);
-      const blobServiceClient = new BlobServiceClient(`https://${azureStorageAccountName}.blob.core.windows.net`, sharedKeyCredential);
-      const containerClient = blobServiceClient.getContainerClient(azureContainerName);
+      // const sharedKeyCredential = new StorageSharedKeyCredential(azureStorageAccountName, azureStorageAccountKey);
+      // const blobServiceClient = new BlobServiceClient(`https://${azureStorageAccountName}.blob.core.windows.net`, sharedKeyCredential);
+      // const containerClient = blobServiceClient.getContainerClient(azureContainerName);
 
-      try {
-        const response = await axios.get(agoraRecordingUrl, { responseType: "arraybuffer" });
-        const recordingData = response.data;
+      // try {
+      //   const response = await axios.get(agoraRecordingUrl, { responseType: "arraybuffer" });
+      //   const recordingData = response.data;
 
-        const blobName = `${channelname}_recording.mp4`; // Customize the blob name as needed
-        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-        const uploadResponse = await blockBlobClient.upload(recordingData, recordingData.length);
+      //   const blobName = `${channelname}_recording.mp4`; // Customize the blob name as needed
+      //   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      //   const uploadResponse = await blockBlobClient.upload(recordingData, recordingData.length);
 
-        console.log("File uploaded to Azure Blob Storage successfully.");
-      } catch (error) {
-        console.error("Error uploading file to Azure Blob Storage:", error);
-      }
+      //   console.log("File uploaded to Azure Blob Storage successfully.");
+      // } catch (error) {
+      //   console.error("Error uploading file to Azure Blob Storage:", error);
+      // }
 
 
 
