@@ -2387,11 +2387,11 @@ const startRecording = async (resourceid, uid, channelname, token) => {
         },
       },
       storageConfig: {
-        vendor: 5,
+        vendor: 1,
         region: 0,
         bucket: `auctoinvideos/${channelname}`,
-        accessKey: "ZJ7BqXvn8AsvRZ0Yd26/8tdpjOrEr1rHo9mIzuKGx3c4yfKrYE3TAIWdd+DCxjs6LhUBG6qD3rZp+ASteEIYfg==",
-        // secretKey: bucketSecretKey,
+        accessKey: "auctionzone",
+        secretKey: "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==",
       },
     },
   };
