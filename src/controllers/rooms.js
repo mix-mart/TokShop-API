@@ -1,3 +1,4 @@
+const { BlobServiceClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
 const roomsModel = require("../models/roomSchema");
 const userModel = require("../models/userSchema");
 const interestModel = require("../models/channelSchema");
@@ -2449,6 +2450,32 @@ exports.recordRoom = async (req, res) => {
       );
       console.log("response", response.data);
       //       console.log("reee", reee);
+
+
+      // After starting recording, you can now store the Agora recording in Azure Blob Storage
+      const agoraRecordingUrl = uid; // Replace with the actual Agora recording URL
+      const azureStorageAccountName = "auctionzone";
+      const azureStorageAccountKey = "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
+      const azureContainerName = "auctoinvideos";
+
+      const sharedKeyCredential = new StorageSharedKeyCredential(azureStorageAccountName, azureStorageAccountKey);
+      const blobServiceClient = new BlobServiceClient(`https://${azureStorageAccountName}.blob.core.windows.net`, sharedKeyCredential);
+      const containerClient = blobServiceClient.getContainerClient(azureContainerName);
+
+      try {
+        const response = await axios.get(agoraRecordingUrl, { responseType: "arraybuffer" });
+        const recordingData = response.data;
+
+        const blobName = `${channelname}_recording.mp4`; // Customize the blob name as needed
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+        const uploadResponse = await blockBlobClient.upload(recordingData, recordingData.length);
+
+        console.log("File uploaded to Azure Blob Storage successfully.");
+      } catch (error) {
+        console.error("Error uploading file to Azure Blob Storage:", error);
+      }
+
+
 
       let saved = await roomsModel
         .findByIdAndUpdate(

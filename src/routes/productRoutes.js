@@ -20,7 +20,7 @@ productRouter
   .route("/:shopId")
   .post(
     passport.authenticate("jwt", { session: false }),
-    subscriptionController.isSubscriptionValid,
+    // subscriptionController.isSubscriptionValid,
     productController.addProductToShop
   );
 

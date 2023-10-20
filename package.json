@@ -6,6 +6,7 @@
     "start": "nodemon ./bin/www"
   },
   "dependencies": {
+    "@azure/storage-blob": "^12.16.0",
     "@onesignal/node-onesignal": "^1.0.0-beta4",
     "@sendgrid/mail": "^7.7.0",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
