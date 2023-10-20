@@ -1,96 +1,91 @@
-const cloudinary = require('cloudinary').v2;
-const Video = require('../models/uplodedVideoSchema');
-const fs = require("fs");
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
-  });
 
-// Upload a video to Cloudinary
+const Product = require("../models/productSchema");
+const { BlobServiceClient, StorageSharedKeyCredential, generateBlobSASQueryParameters, ContainerSASPermissions, BlobSASPermissions } = require("@azure/storage-blob");
+
+// const connectionString = "DefaultEndpointsProtocol=https;AccountName=auctionzone;AccountKey=easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==;EndpointSuffix=core.windows.net";
+const containerName = "auctoinvideos";
+
+const accountName = 'auctionzone';
+const accountKey = 'easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==';
+
+const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, sharedKeyCredential);
+
+
 exports.uploadVideo = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'File upload failed' });
-  }
-
   try {
-    const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path,{
-        resource_type: 'video', // Specify the resource type as 'video'
-      });
+    // Upload video to Azure Blob Storage
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const blockBlobClient = containerClient.getBlockBlobClient(req.file.originalname);
 
-    // Save video details to your database
-    const video = new Video({
-      title: req.file.originalname,
-      publicId: public_id,
-      secureUrl: secure_url,
-    });
-    await video.save();
+    // Upload the video to Azure Blob Storage
+    
+    const cleanBuffer = (buffer) => {
+      return Buffer.from(buffer.toString('binary'), 'binary');
+    };
 
-    res.status(200).json({
-      message: 'File uploaded successfully',
-      video: video,
+    await blockBlobClient.upload(cleanBuffer(req.file.buffer), req.file.buffer.length, {
+      blobHTTPHeaders: { blobContentType: req.file.mimetype },
     });
-    fs.unlinkSync(req.file.path);
+
+    // Generate a SAS token for the uploaded video
+    const containerSAS = generateBlobSASQueryParameters(
+      {
+        containerName: containerName,
+        permissions: ContainerSASPermissions.parse("racwd"), // Adjust permissions as needed
+        startsOn: new Date(),
+        expiresOn: new Date(new Date().valueOf() + 86400 * 7 * 1000), // Extend the expiry time by 7 days (in milliseconds)
+        
+      },
+      sharedKeyCredential // This is the shared key credential
+    );
+    
+    // Now, you can append the generated SAS token to the video URL to provide access.
+    const videoUrlWithSAS = `${blockBlobClient.url}?${containerSAS.toString()}`;
+  
+    const existingProduct = await Product.findById(req.body.productId);
+
+    if (!existingProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Update the product's video details
+    existingProduct.videoUrlWithSAS = videoUrlWithSAS;
+    existingProduct.blobName = blockBlobClient.name;
+
+    // Save the updated product to the database
+    await existingProduct.save();
+  
+  
+    res.status(201).json({ message: "File uploaded successfully", videoUrl: videoUrlWithSAS ,blobName:blockBlobClient.name,expiresOn:containerSAS.expiresOn});
   } catch (error) {
-    console.error('Error while uploading video:', error);
-    res.status(500).json({ message: 'Error while uploading video' });
+    console.error("Error uploading video:", error);
+    res.status(500).json({ message: "Error while uploading video" });
   }
 };
-
-// List all uploaded videos
-exports.listVideos = async (req, res) => {
-  try {
-    const videos = await Video.find();
-    res.status(200).json({ videos });
-  } catch (error) {
-    console.error('Error while listing videos:', error);
-    res.status(500).json({ message: 'Error while listing videos' });
-  }
-};
-
-// Delete a video by its public ID
 exports.deleteVideo = async (req, res) => {
-  const publicId = req.params.publicId;
-
   try {
-    const video = await Video.findOne({ publicId });
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
+    // Delete video from Azure Blob Storage
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+    const blockBlobClient = containerClient.getBlockBlobClient(req.params.blobName);
+    const existingProduct = await Product.findById(req.body.productId);
 
-    // Delete the video from Cloudinary
-    const deleteResponse = await cloudinary.uploader.destroy(publicId);
-
-    if (deleteResponse.result === 'ok') {
-      // Delete the video record from your database
-      await video.remove();
-      res.status(200).json({ message: 'Video deleted successfully' });
-    } else {
-      console.error('Error deleting video from Cloudinary');
-      res.status(500).json({ message: 'Error while deleting video from Cloudinary' });
+    if (!existingProduct) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+    await blockBlobClient.delete();
+
+    // Update the product's video details
+    existingProduct.videoUrlWithSAS = null;
+    existingProduct.blobName = null;
+
+    // Save the updated product to the database
+    await existingProduct.save();
+  
+
+    res.status(200).json({ message: "Video deleted successfully" });
   } catch (error) {
-    console.error('Error while deleting video:', error);
-    res.status(500).json({ message: 'Error while deleting video' });
+    console.error("Error deleting video:", error);
+    res.status(500).json({ message: "Error while deleting video" });
   }
 };
-
-// Get a specific video by public ID
-exports.getVideo = async (req, res) => {
-    const publicId = req.params.publicId;
-  
-    try {
-      const video = await Video.findOne({ publicId });
-  
-      if (!video) {
-        return res.status(404).json({ message: 'Video not found' });
-      }
-  
-      // Respond with the video object or desired information
-      res.status(200).json(video);
-    } catch (error) {
-      console.error('Error while fetching video:', error);
-      res.status(500).json({ message: 'Error while fetching video' });
-    }
-  };
