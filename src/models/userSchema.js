@@ -195,8 +195,17 @@ const userSchema = new Schema(
         required: true,
         default: 31.233334
       }
+    },
+    ip: {
+      type:String,
+      default:null
+    },
+    macAddress: {
+      type:String,
+      default:null
     }
   },
+  
   {
     timestamps: true,
     autoCreate: true, // auto create collection
