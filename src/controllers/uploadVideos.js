@@ -1,3 +1,18 @@
+const multer = require("multer");
+const ffmpeg = require('fluent-ffmpeg');
+// const fileType = require("file-type");
+// const mimetype = require("mimetype");
+// const fs = require("fs");
+// const util = require("util");
+// const writeFileAsync = util.promisify(fs.writeFile);
+
+ const ffmpegPath = require('ffmpeg-static');
+ const ffprobePath = require('ffprobe-static');
+ // Set the paths for ffmpeg and ffprobe
+ ffmpeg.setFfmpegPath(ffmpegPath);
+ ffmpeg.setFfprobePath(ffprobePath);
+
+
 
 const Product = require("../models/productSchema");
 const { BlobServiceClient, StorageSharedKeyCredential, generateBlobSASQueryParameters, ContainerSASPermissions, BlobSASPermissions } = require("@azure/storage-blob");
@@ -28,21 +43,25 @@ exports.uploadVideo = async (req, res) => {
       blobHTTPHeaders: { blobContentType: req.file.mimetype },
     });
 
+// console.log(req.file.buffer.length)
+
     // Generate a SAS token for the uploaded video
     const containerSAS = generateBlobSASQueryParameters(
       {
         containerName: containerName,
         permissions: ContainerSASPermissions.parse("racwd"), // Adjust permissions as needed
         startsOn: new Date(),
-        expiresOn: new Date(new Date().valueOf() + 86400 * 7 * 1000), // Extend the expiry time by 7 days (in milliseconds)
+        expiresOn: new Date(new Date().valueOf() + 86400 * 365 * 1000), // Extend the expiry time by 7 days (in milliseconds)
         
       },
-      sharedKeyCredential // This is the shared key credential
+      sharedKeyCredential 
     );
     
-    // Now, you can append the generated SAS token to the video URL to provide access.
+
+        
     const videoUrlWithSAS = `${blockBlobClient.url}?${containerSAS.toString()}`;
-  
+    
+
     const existingProduct = await Product.findById(req.body.productId);
 
     if (!existingProduct) {
@@ -53,11 +72,17 @@ exports.uploadVideo = async (req, res) => {
     existingProduct.videoUrlWithSAS = videoUrlWithSAS;
     existingProduct.blobName = blockBlobClient.name;
 
-    // Save the updated product to the database
+    
     await existingProduct.save();
   
   
-    res.status(201).json({ message: "File uploaded successfully", videoUrl: videoUrlWithSAS ,blobName:blockBlobClient.name,expiresOn:containerSAS.expiresOn});
+    res.status(201).json({ 
+      message: "File uploaded successfully", 
+      videoUrl: videoUrlWithSAS ,
+      blobName:blockBlobClient.name,
+      expiresOn:containerSAS.expiresOn,
+        // videoDuration: videoDuration,
+  });
   } catch (error) {
     console.error("Error uploading video:", error);
     res.status(500).json({ message: "Error while uploading video" });

@@ -26,7 +26,7 @@ shopRouter
   )
   .post(
     // 		upload.single("image"),
-    passport.authenticate("jwt", { session: false }),
+    // passport.authenticate("jwt", { session: false }),
     shopController.createShop
   );
 

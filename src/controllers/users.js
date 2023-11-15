@@ -1366,3 +1366,22 @@ exports.addUserReview = async (req, res) => {
       .json(error.message);
   }
 };
+
+exports.updateIP=async (req,res)=>{
+try{
+  const{id}=req.params;
+  // const{ip,macAdress}=req.body;
+  const updatedUser=await userModel.findByIdAndUpdate( id, req.body,
+    {  new: true }
+  );
+  res
+  .status(200)
+  .setHeader("Content-Type", "application/json")
+  .json({ success: true, updatedUser });
+}catch (error) {
+  res
+    .status(422)
+    .setHeader("Content-Type", "application/json")
+    .json(error.message);
+}
+}

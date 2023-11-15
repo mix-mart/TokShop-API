@@ -176,6 +176,7 @@ userRouter
 userRouter.route("/review/:id").post(userController.addUserReview);
 userRouter.route("/review/:id").get(userController.getUserReviews);
 userRouter.route("/canreview/:id").post(userController.checkCanReview);
+userRouter.route("/updateIp/:id").post(userController.updateIP);
 
 userRouter
   .route("/review/delete/review/:id")

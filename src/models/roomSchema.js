@@ -18,7 +18,7 @@ const roomSchema = new Schema(
     productIds: [
       {
         type: Schema.Types.ObjectId,
-        required: true,
+        // required: true,
         ref: "product",
       },
     ],
