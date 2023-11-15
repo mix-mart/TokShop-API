@@ -75,6 +75,7 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     const userId = req.user.id;
     const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
     console.log(AllSubscriptions)
+    if (!AllSubscriptions) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
     const lastSubscription = AllSubscriptions[0];
     const packageId = AllSubscriptions[0].packageId;
     const package = await Package.findById(packageId);
@@ -90,6 +91,10 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     }
 
     // res.status(200).json(AllSubscriptions)
-    next();
+    res.status(200).json({
+        status: "success",
+        isAllowed: true,
+        message: "you are allowed to add product"
+    })
 
 })

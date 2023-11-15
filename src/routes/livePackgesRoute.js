@@ -19,5 +19,6 @@ router.delete('/:id', livePackageController.deleteLivePackages);
 
 //apply live packge coupon
 router.post('/apply', livePackageController.apllayCouponOnLivePackge);
+router.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
 
 module.exports = router;

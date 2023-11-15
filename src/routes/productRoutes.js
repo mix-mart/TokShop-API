@@ -1,6 +1,7 @@
 const express = require("express");
 const productRouter = express.Router();
 const productController = require("../controllers/products");
+const authController = require("../controllers/auth");
 const subscriptionController = require('../controllers/subscription')
 const multer = require("multer");
 
@@ -20,7 +21,7 @@ productRouter
   .route("/:shopId")
   .post(
     passport.authenticate("jwt", { session: false }),
-    // subscriptionController.isSubscriptionValid,
+
     productController.addProductToShop
   );
 
@@ -78,6 +79,6 @@ productRouter
 productRouter
   .route("/review/delete/review/:id")
   .delete(productController.deleteProductReviewsById);
-
+productRouter.get("/is-subscription-valid", authController.protect, subscriptionController.isSubscriptionValid);
 
 module.exports = productRouter;

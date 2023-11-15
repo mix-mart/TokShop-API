@@ -1,6 +1,8 @@
 const express = require("express");
 const userRouter = express.Router();
 const userController = require("../controllers/users");
+// subscriptionController.isSubscriptionValid
+const subscriptionController = require('../controllers/subscription');
 const authController = require('../controllers/auth');
 const passport = require("passport");
 
@@ -182,16 +184,16 @@ userRouter
 userRouter
   .route("/updateinterests/:id")
   .put(userController.updateUserInterests);
-  // userRouter.route('/signup').post(signUp); 
-  userRouter.route("/login").post(login)
+// userRouter.route('/signup').post(signUp); 
+userRouter.route("/login").post(login)
 
 userRouter.route('/signup').post(authController.signUp);
 userRouter.route('/forgot-my-password').post(authController.forgotPassword)
-userRouter.route('/update/password').put( authController.protect,authController.changePassword)
+userRouter.route('/update/password').put(authController.protect, authController.changePassword)
 
 // Route for resetting password using the reset token
 userRouter.post('/reset-password/:token', authController.resetPassword);
-
+// userRouter.post("/is-subscription-valid/", authController.protect, subscriptionController.isSubscriptionValid);
 
 
 module.exports = userRouter;
