@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler');
 const AppError = require('../utils/appError');
 const couponModel = require('../models/couponSchema');
 const catchAsync = require('../utils/catchAsync');
+const Subscription = require('../models/subscriptionModel');
 
 
 exports.createLivePackage = async (req, res) => {
@@ -94,10 +95,13 @@ exports.apllayCouponOnLivePackge = asyncHandler(async (req, res, next) => {
   });
 });
 exports.isSubscribedToLivePackage = catchAsync(async (req, res, next) => {
+
+  console.log(req.user)
   const userId = req.user.id;
   const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
-  console.log(AllSubscriptions)
-  if (!AllSubscriptions) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
+  console.log(!AllSubscriptions)
+  if (AllSubscriptions.length === 0) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
+
   res.status(200).json({
     status: "success",
     isAllowed: true,

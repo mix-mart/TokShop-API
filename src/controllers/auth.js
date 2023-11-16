@@ -247,7 +247,7 @@ exports.protect = asyncHandler(async (req, res, next) => {
 
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   // req.user = decoded;
-
+  // console.log(decoded)
   //2:check if user exist
   const curentUser = await userModel.findById(decoded.userId);
 

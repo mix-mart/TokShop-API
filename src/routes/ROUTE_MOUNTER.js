@@ -25,6 +25,8 @@ const packageRouter = require("./packageRoute");
 const LivePackageRouter = require('./livePackgesRoute')
 const coordinatesRouter = require('./coordinatesRoute');
 const couponRoute = require('./couponRoute')
+const authController = require('../controllers/auth')
+const livePackageController = require('../controllers/livePackges');
 
 const uploadVideoRoute = require('./uploadVideoRoute')
 
@@ -54,6 +56,7 @@ app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
 app.use("/livePackges", LivePackageRouter);
+app.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
 app.use("/videos", uploadVideoRoute);
 
 app.use(

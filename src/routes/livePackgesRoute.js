@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
 const authController = require('../controllers/auth');
 const livePackageController = require('../controllers/livePackges');
+
 
 // Create a new package
 router.post('/', livePackageController.createLivePackage);
@@ -20,6 +22,6 @@ router.delete('/:id', livePackageController.deleteLivePackages);
 
 //apply live packge coupon
 router.post('/apply', livePackageController.apllayCouponOnLivePackge);
-router.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
+
 
 module.exports = router;
