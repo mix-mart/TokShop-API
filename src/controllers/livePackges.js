@@ -98,7 +98,7 @@ exports.isSubscribedToLivePackage = catchAsync(async (req, res, next) => {
 
   console.log(req.user)
   const userId = req.user.id;
-  const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
+  const AllSubscriptions = await auctionSubscription.find({ userId }).sort({ createdAt: -1 });
   console.log(!AllSubscriptions)
   if (AllSubscriptions.length === 0) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
 
