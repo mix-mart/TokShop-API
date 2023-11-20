@@ -1,10 +1,13 @@
-const { BlobServiceClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
+const {
+  BlobServiceClient,
+  StorageSharedKeyCredential,
+} = require("@azure/storage-blob");
 const roomsModel = require("../models/roomSchema");
 const userModel = require("../models/userSchema");
 const interestModel = require("../models/channelSchema");
 const recordingsModel = require("../models/recordingsSchema");
 var auctionModel = require("../models/auction");
-const auctionSubscription = require('../models/auctionSubscription');
+const auctionSubscription = require("../models/auctionSubscription");
 
 const functions = require("../shared/functions");
 require("dotenv").config({ path: ".env" });
@@ -112,13 +115,15 @@ exports.createRoom = async (req, res) => {
       { runValidators: true, new: true, upsert: false }
     );
     let token = await generateRoomToken(newRoom._id);
-    let newRoomrees = await roomsModel.findByIdAndUpdate(
-      newRoom._id,
-      {
-        $set: { token: token },
-      },
-      { runValidators: true, new: true, upsert: false }
-    ).populate("channel")
+    let newRoomrees = await roomsModel
+      .findByIdAndUpdate(
+        newRoom._id,
+        {
+          $set: { token: token },
+        },
+        { runValidators: true, new: true, upsert: false }
+      )
+      .populate("channel")
       .populate({
         path: "channel",
         populate: {
@@ -183,7 +188,8 @@ exports.createRoom = async (req, res) => {
           var follower = await userModel.findOne({ _id: user.followers[i] });
 
           if (
-            follower != null && follower["notificationToken"] != "" &&
+            follower != null &&
+            follower["notificationToken"] != "" &&
             !hostNotificationTokens.includes(follower["notificationToken"])
           ) {
             userNotificationTokens.push(follower["notificationToken"]);
@@ -221,9 +227,9 @@ exports.createRoom = async (req, res) => {
           hostNotificationTokens,
           "You've been invited",
           user.firstName +
-          " " +
-          user.lastName +
-          " has invited you to be a co-host in their TokShow. Join?.",
+            " " +
+            user.lastName +
+            " has invited you to be a co-host in their TokShow. Join?.",
           "RoomScreen",
           newRoom._id
         );
@@ -463,9 +469,9 @@ exports.createEvent = async (req, res) => {
         hostNotificationTokens,
         "You've been invited",
         user.firstName +
-        " " +
-        user.lastName +
-        " has invited you to be a co-host in their event.",
+          " " +
+          user.lastName +
+          " has invited you to be a co-host in their event.",
         "EventScreen",
         newRoom._id
       );
@@ -585,7 +591,8 @@ exports.getAllTokshows = async (req, res) => {
           "profilePhoto",
           "roomuid",
           "agorauid",
-        ]).populate("channel")
+        ])
+        .populate("channel")
         .populate("userIds", [
           "firstName",
           "lastName",
@@ -605,7 +612,7 @@ exports.getAllTokshows = async (req, res) => {
           "profilePhoto",
           "roomuid",
           "agorauid",
-          "muted"
+          "muted",
         ])
         .populate("speakerIds", [
           "firstName",
@@ -772,7 +779,7 @@ exports.getRoomsByUserId = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-        "muted"
+        "muted",
       ])
       .populate("speakerIds", [
         "firstName",
@@ -802,7 +809,8 @@ exports.getRoomsByUserId = async (req, res) => {
             path: "user",
           },
         },
-      }).populate("channel")
+      })
+      .populate("channel")
       .populate({
         path: "activeauction",
         populate: {
@@ -924,7 +932,8 @@ exports.getActiveTokshows = async (req, res) => {
           "profilePhoto",
           "roomuid",
           "agorauid",
-        ]).populate("channel")
+        ])
+        .populate("channel")
         .populate("raisedHands", [
           "firstName",
           "lastName",
@@ -934,7 +943,7 @@ exports.getActiveTokshows = async (req, res) => {
           "profilePhoto",
           "roomuid",
           "agorauid",
-          "muted"
+          "muted",
         ])
         .populate({
           path: "activeauction",
@@ -1146,7 +1155,7 @@ exports.getMyEvents = async (req, res) => {
         "userName",
         "email",
         "profilePhoto",
-        "muted"
+        "muted",
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1212,7 +1221,9 @@ exports.sendRoomNotifications = async (req, res) => {
     functions.sendNotificationToAll({
       included_segments: ["Subscribed Users"],
       data: { screen: "RoomScreen", id: req.body.room._id },
-      headings: { en: `Join ${req.body.streamtypetype} Live TokShow by ${req.body.user.firstName}` },
+      headings: {
+        en: `Join ${req.body.streamtypetype} Live TokShow by ${req.body.user.firstName}`,
+      },
       contents: {
         en: ` ${req.body.user.firstName} is live on ${req.body.streamtypetype} talking about ${req.body.room.productIds[0].name} click here to join watch.`,
       },
@@ -1233,18 +1244,14 @@ exports.sendRoomNotifications = async (req, res) => {
           [user.notificationToken],
           userdata.firstName + " is live!",
           userdata.firstName +
-          " is live talking about `" +
-          req.body.room.productIds[0].name +
-          "`. join them.",
+            " is live talking about `" +
+            req.body.room.productIds[0].name +
+            "`. join them.",
           "RoomScreen",
           req.body.room._id
         );
       }
     });
-
-
-
-
 
     let respnse = await roomsModel
       .findByIdAndUpdate(
@@ -1285,7 +1292,7 @@ exports.sendRoomNotifications = async (req, res) => {
         "userName",
         "email",
         "profilePhoto",
-        "muted"
+        "muted",
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1396,7 +1403,7 @@ exports.updateRoomById = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-        "muted"
+        "muted",
       ])
       .populate("speakerIds", [
         "firstName",
@@ -1571,7 +1578,6 @@ exports.removeUserFromRoom = async (req, res) => {
     );
 
     if (req.body.speakerIds) {
-
       await roomsModel.findByIdAndUpdate(
         req.params.roomId,
         {
@@ -1581,7 +1587,6 @@ exports.removeUserFromRoom = async (req, res) => {
       );
     }
     if (req.body.raisedHands) {
-
       await roomsModel.findByIdAndUpdate(
         req.params.roomId,
         {
@@ -1811,7 +1816,7 @@ exports.getEventById = async (req, res) => {
         "profilePhoto",
         "roomuid",
         "agorauid",
-        "muted"
+        "muted",
       ])
       .populate("speakerIds", [
         "firstName",
@@ -2031,7 +2036,7 @@ exports.getRoomById = async (req, res) => {
       .populate({
         path: "activeauction",
         populate: {
-          path: "winner"
+          path: "winner",
         },
       })
       .populate({
@@ -2081,7 +2086,8 @@ exports.getRoomById = async (req, res) => {
         populate: {
           path: "address",
         },
-      }).populate("channel")
+      })
+      .populate("channel")
       .populate({
         path: "channel",
         populate: {
@@ -2258,8 +2264,6 @@ exports.stopRecording = async (req, res) => {
 
   console.log(clientRequest);
 
-
-
   let url = `http://api.agora.io/v1/apps/${AppId}/cloud_recording/resourceid/${resourceid}/sid/${sid}/mode/mix/stop`;
 
   console.log("url", url);
@@ -2272,25 +2276,37 @@ exports.stopRecording = async (req, res) => {
       //       res.json({ success: true, message: response.data });
       // Now, fetch the recording information, including the URL
 
-
       // Make a GET request to fetch the recording information
       // After starting recording, you can now store the Agora recording in Azure Blob Storage
       const agoraRecordingUrl = `http://api.agora.io/v1/apps/${AppId}/cloud_recording/resourceid/${resourceid}/sid/${sid}/mode/mix/query`; // Replace with the actual Agora recording URL
       const azureStorageAccountName = "auctionzone";
-      const azureStorageAccountKey = "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
+      const azureStorageAccountKey =
+        "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==";
       const azureContainerName = "auctoinvideos";
 
-      const sharedKeyCredential = new StorageSharedKeyCredential(azureStorageAccountName, azureStorageAccountKey);
-      const blobServiceClient = new BlobServiceClient(`https://${azureStorageAccountName}.blob.core.windows.net`, sharedKeyCredential);
-      const containerClient = blobServiceClient.getContainerClient(azureContainerName);
+      const sharedKeyCredential = new StorageSharedKeyCredential(
+        azureStorageAccountName,
+        azureStorageAccountKey
+      );
+      const blobServiceClient = new BlobServiceClient(
+        `https://${azureStorageAccountName}.blob.core.windows.net`,
+        sharedKeyCredential
+      );
+      const containerClient =
+        blobServiceClient.getContainerClient(azureContainerName);
 
       try {
-        const response = await axios.get(agoraRecordingUrl, { responseType: "arraybuffer" });
+        const response = await axios.get(agoraRecordingUrl, {
+          responseType: "arraybuffer",
+        });
         const recordingData = response.data;
 
         const blobName = `${channelname}_recording.mp4`; // Customize the blob name as needed
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-        const uploadResponse = await blockBlobClient.upload(recordingData, recordingData.length);
+        const uploadResponse = await blockBlobClient.upload(
+          recordingData,
+          recordingData.length
+        );
 
         console.log("File uploaded to Azure Blob Storage successfully.");
       } catch (error) {
@@ -2310,15 +2326,12 @@ exports.stopRecording = async (req, res) => {
         // durationInSeconds
       };
 
-
       try {
         await recordingsModel.create(newRecording);
-        res
-          .status(200)
-          .setHeader("Content-Type", "application/json")
-          .json({
-            success: true, recording: response.data
-          });
+        res.status(200).setHeader("Content-Type", "application/json").json({
+          success: true,
+          recording: response.data,
+        });
       } catch (e) {
         console.log("error. saving" + e);
       }
@@ -2334,20 +2347,24 @@ exports.updateSubMinutes = async (req, res, next) => {
   const endTime = new Date(req.body.endTime);
   const durationInSeconds = (endTime - startTime) / 1000; // Duration in seconds
 
-
   //update the subscription in database.
-  const AllSubscriptions = await auctionSubscription.find({ userId: req.body.userId }).sort({ createdAt: -1 });
-  console.log(AllSubscriptions)
+  const AllSubscriptions = await auctionSubscription
+    .find({ userId: req.body.userId })
+    .sort({ createdAt: -1 });
+  console.log(AllSubscriptions);
   const lastSubscription = AllSubscriptions[0];
   const usedMinutes = durationInSeconds / 60;
-  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(lastSubscription.id, { "$inc": { "usedMinutes": usedMinutes } }, { new: true })
+  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(
+    lastSubscription.id,
+    { $inc: { usedMinutes: usedMinutes } },
+    { new: true }
+  );
 
   res.status(200).setHeader("Content-Type", "application/json").json({
-    status: 'success',
-    updatedSubscription: updatedUsedMinutes
-  })
-
-}
+    status: "success",
+    updatedSubscription: updatedUsedMinutes,
+  });
+};
 const startRecording = async (resourceid, uid, channelname, token) => {
   var settingsresponse = await functions.getSettings();
 
@@ -2367,19 +2384,19 @@ const startRecording = async (resourceid, uid, channelname, token) => {
     uid: uid,
     clientRequest: {
       token: token,
-      "recordingConfig": {
-        "channelType": 0,
-        "streamTypes": 2,
-        "audioProfile": 1,
-        "videoStreamType": 0,
-        "maxIdleTime": 45,
-        "transcodingConfig": {
-          "width": 360,
-          "height": 640,
-          "fps": 30,
-          "bitrate": 600,
-          "maxResolutionUid": "1",
-          "mixedVideoLayout": 1
+      recordingConfig: {
+        channelType: 0,
+        streamTypes: 2,
+        audioProfile: 1,
+        videoStreamType: 0,
+        maxIdleTime: 45,
+        transcodingConfig: {
+          width: 360,
+          height: 640,
+          fps: 30,
+          bitrate: 600,
+          maxResolutionUid: "1",
+          mixedVideoLayout: 1,
         },
 
         recordingFileConfig: {
@@ -2391,7 +2408,8 @@ const startRecording = async (resourceid, uid, channelname, token) => {
         region: 0,
         bucket: `auctoinvideos/${channelname}`,
         accessKey: "auctionzone",
-        secretKey: "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==",
+        secretKey:
+          "easuk7Ao0ZErdoB3aYSROSXeEFXA8hQ92/kSOVIpjY4j/M6EJR1AZaRE1W9sMUxK3gMRr3QWJOq4+AStsgbHvg==",
       },
     },
   };
@@ -2538,7 +2556,6 @@ exports.recordRoom = async (req, res) => {
   // Capture the start time when recording begins
   const startTime = new Date();
 
-
   let url = `https://api.agora.io/v1/apps/${AppId}/cloud_recording/acquire`;
   console.log(url);
   axios
@@ -2557,7 +2574,6 @@ exports.recordRoom = async (req, res) => {
       }
     )
     .then(async (response) => {
-
       let reee = await startRecording(
         response.data.resourceId,
         uid,
@@ -2566,7 +2582,6 @@ exports.recordRoom = async (req, res) => {
       );
       console.log("response", response.data);
       //       console.log("reee", reee);
-
 
       // // After starting recording, you can now store the Agora recording in Azure Blob Storage
       // const agoraRecordingUrl = url; // Replace with the actual Agora recording URL
@@ -2590,8 +2605,6 @@ exports.recordRoom = async (req, res) => {
       // } catch (error) {
       //   console.error("Error uploading file to Azure Blob Storage:", error);
       // }
-
-
 
       let saved = await roomsModel
         .findByIdAndUpdate(
@@ -2717,8 +2730,8 @@ exports.recordRoom = async (req, res) => {
         ]);
 
       res.json({
-        startTime
-        , saved
+        startTime,
+        saved,
       });
     })
     .catch((error) => {
@@ -2748,7 +2761,7 @@ exports.deleteRoomById = async (req, res) => {
     if (updatedRoom.activeauction) {
       await auctionModel.findByIdAndUpdate(updatedRoom._id, {
         $set: {
-          ended: true
+          ended: true,
         },
       });
     }
