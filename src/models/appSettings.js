@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const AppSettingsSchema = mongoose.Schema({
   agoraAppID: {
     type: String,
-    default: "eaa1810d9a4a477d97053548a5ef7819",
+    default: "8fdf4e3b00b6422fba8ddfa59691dd0f",
   },
   agoraAppRecordKey: {
     type: String,
@@ -46,15 +46,15 @@ const AppSettingsSchema = mongoose.Schema({
   },
   AGORA_CERT: {
     type: String,
-    default: "186d397ac7c44275badc356200fd86c1",
+    default: "f2754cc7e8734f71aefec4f15f12c219",
   },
   AGORA_CUSTOMER_KEY: {
     type: String,
-    default: "4714495b140b408baf6a22a8beb6df8d",
+    default: "8fdf4e3b00b6422fba8ddfa59691dd0f",
   },
   AGORA_CUSTOMER_SECRET: {
     type: String,
-    default: "f0703a9c08694f738c32bb8e8115e0d2",
+    default: "f2754cc7e8734f71aefec4f15f12c219",
   },
   FLUTTERWAVE_SECRET_KEY: {
     type: String,
