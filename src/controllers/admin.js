@@ -15,28 +15,61 @@ exports.getAppSettings = async function (req, res) {
   }
 };
 
+// exports.saveAppSettings = async function (req, res) {
+//   const settings = await AppSettingsSchema.find();
+//   if (settings.length > 0) {
+//     await AppSettingsSchema.findByIdAndUpdate(
+//       { _id: settings[0]._id },
+//       { $set: req.body },
+//       { runValidators: true }
+//     );
+//   } else {
+//     let settingsdata = new AppSettingsSchema(req.body);
+//     settingsdata.save((err, setting) => {
+//       if (err) {
+//         res.status(400).json({
+//           success: false,
+//           message: "Failed to add user. " + err,
+//         });
+//       } else {
+//         res.status(200).json(setting);
+//       }
+//     });
+//   }
+// };
+
 exports.saveAppSettings = async function (req, res) {
-  const settings = await AppSettingsSchema.find();
-  if (settings.length > 0) {
-    await AppSettingsSchema.findByIdAndUpdate(
-      { _id: settings[0]._id },
-      { $set: req.body },
-      { runValidators: true }
-    );
-  } else {
-    let settingsdata = new AppSettingsSchema(req.body);
-    settingsdata.save((err, setting) => {
-      if (err) {
-        res.status(400).json({
-          success: false,
-          message: "Failed to add user. " + err,
-        });
-      } else {
-        res.status(200).json(setting);
-      }
+  try {
+    const settings = await AppSettingsSchema.find();
+    if (settings.length > 0) {
+      await AppSettingsSchema.findByIdAndUpdate(
+        { _id: settings[0]._id },
+        { $set: req.body },
+        { runValidators: true }
+      );
+      // Send a success response upon updating existing settings
+      res.status(200).json({ success: true, message: "Settings updated successfully." });
+    } else {
+      let settingsdata = new AppSettingsSchema(req.body);
+      settingsdata.save((err, setting) => {
+        if (err) {
+          res.status(400).json({
+            success: false,
+            message: "Failed to add user. " + err.message, // Include the error message
+          });
+        } else {
+          res.status(200).json({ success: true, message: "Settings added successfully.", data: setting });
+        }
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error.message,
     });
   }
 };
+
 exports.getAllAdmins = async function (req, res) {
   try {
     const admins = await adminModel.find();

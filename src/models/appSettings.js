@@ -50,11 +50,11 @@ const AppSettingsSchema = mongoose.Schema({
   },
   AGORA_CUSTOMER_KEY: {
     type: String,
-    default: "8fdf4e3b00b6422fba8ddfa59691dd0f",
+    default: "4714495b140b408baf6a22a8beb6df8d",
   },
   AGORA_CUSTOMER_SECRET: {
     type: String,
-    default: "f2754cc7e8734f71aefec4f15f12c219",
+    default: "f0703a9c08694f738c32bb8e8115e0d2",
   },
   FLUTTERWAVE_SECRET_KEY: {
     type: String,
