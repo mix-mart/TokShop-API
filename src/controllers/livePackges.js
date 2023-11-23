@@ -56,14 +56,14 @@ exports.getSpcificLivePackge = async (req, res) => {
 exports.updateLivePackage = async (req, res) => {
   try {
     const updatedPackage = await livePackges.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, // Return the updated package
+      new: true, 
     });
     if (!updatedPackage) {
       return res.status(404).json({ error: 'Package not found' });
     }
     res.status(200).json(updatedPackage);
   } catch (error) {
-    // Check for specific errors like validation errors or cast errors
+   
     if (error.name === 'ValidationError') {
       return res.status(422).json({ error: error.message });
     }

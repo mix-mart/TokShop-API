@@ -5,10 +5,10 @@ const authController = require('../controllers/auth');
 
 const auctionSubscriptionsRouter = express.Router();
 
-auctionSubscriptionsRouter.use(authController.protect)
-auctionSubscriptionsRouter.route('/').post(auctionSubscriptionController.subscribe).get(auctionSubscriptionController.getAllPackageSubscriptions)
-auctionSubscriptionsRouter.route('/:id').delete(auctionSubscriptionController.unsubscribe)
-auctionSubscriptionsRouter.route('/:packageId').get(auctionSubscriptionController.getAllUserSubscriptions)
+// auctionSubscriptionsRouter.use(authController.protect)
+auctionSubscriptionsRouter.route('/').post(authController.protect,auctionSubscriptionController.subscribe).get(auctionSubscriptionController.getAllPackageSubscriptions)
+auctionSubscriptionsRouter.route('/:id').delete(authController.protect,auctionSubscriptionController.unsubscribe)
+auctionSubscriptionsRouter.route('/:packageId').get(authController.protect,auctionSubscriptionController.getAllUserSubscriptions)
 // auctionSubscriptionsRouter.route('/').patch(auctionSubscriptionController.renew)
 
 
