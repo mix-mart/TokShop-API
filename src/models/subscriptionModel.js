@@ -44,6 +44,12 @@ const subscriptionSchema = new Schema(
     { timestamps: true, autoIndex: true, autoCreate: true }
 );
 
+// Populate user's name when querying subscriptions
+subscriptionSchema.pre('find', function(next) {
+    this.populate('userId', 'firstName'); 
+    next();
+});
+
 const Subscription = model("subscription", subscriptionSchema);
 
 module.exports = Subscription

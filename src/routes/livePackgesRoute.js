@@ -15,7 +15,7 @@ router.get('/', livePackageController.getAllLivePackages);
 router.get('/:id', livePackageController.getSpcificLivePackge);
 
 // Update an existing package
-router.put('/:id', livePackageController.updateLivepackage);
+router.put('/:id', livePackageController.updateLivePackage);
 
 // Delete a package by ID
 router.delete('/:id', livePackageController.deleteLivePackages);

@@ -39,20 +39,38 @@ exports.getSpcificLivePackge = async (req, res) => {
   }
 };
 
-exports.updateLivepackage = async (req, res) => {
+// exports.updateLivepackage = async (req, res) => {
+//   try {
+//     const package = await livePackges.findByIdAndUpdate(req.params.id, req.body, {
+//       new: true, // Return the updated package
+//     });
+//     if (!package) {
+//       return res.status(404).json({ error: 'Package not found' });
+//     }
+//     res.status(200).json(package);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// };
+
+exports.updateLivePackage = async (req, res) => {
   try {
-    const package = await livePackges.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedPackage = await livePackges.findByIdAndUpdate(req.params.id, req.body, {
       new: true, // Return the updated package
     });
-    if (!package) {
+    if (!updatedPackage) {
       return res.status(404).json({ error: 'Package not found' });
     }
-    res.status(200).json(package);
+    res.status(200).json(updatedPackage);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    // Check for specific errors like validation errors or cast errors
+    if (error.name === 'ValidationError') {
+      return res.status(422).json({ error: error.message });
+    }
+    // Handle other errors
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 exports.deleteLivePackages = async (req, res) => {
   try {
     const package = await livePackges.findByIdAndRemove(req.params.id);

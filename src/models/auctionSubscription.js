@@ -57,6 +57,13 @@ const auctionSubscriptionSchema = new Schema(
     { timestamps: true, autoIndex: true, autoCreate: true }
 );
 
+// Populate user's name when querying subscriptions
+auctionSubscriptionSchema.pre('find', function(next) {
+    this.populate('userId', 'firstName'); 
+    next();
+});
+
+
 const auctionSubscription = model("AuctionSubscription", auctionSubscriptionSchema);
 
 module.exports = auctionSubscription
