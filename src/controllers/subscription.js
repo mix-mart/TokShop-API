@@ -56,7 +56,7 @@ exports.getAllUserSubscriptions = catchAsync(async (req, res, next) => {
     })
 })
 exports.getAllPackageSubscriptions = catchAsync(async (req, res, next) => {
-    const packageId = req.body.packageId;
+    const packageId = req.params.packageId;
 
     const subscriptions = await Subscription.find({
         packageId

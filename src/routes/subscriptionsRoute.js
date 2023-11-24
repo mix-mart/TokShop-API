@@ -10,6 +10,6 @@ subscriptionsRouter.route('/').post(authController.protect,subscriptionControlle
 subscriptionsRouter.route('/:id').delete(authController.protect,subscriptionController.unsubscribe)
 subscriptionsRouter.route('/:packageId').get(authController.protect,subscriptionController.getAllUserSubscriptions)
 subscriptionsRouter.route('/').patch(authController.protect,subscriptionController.renew)
-
+subscriptionsRouter.route('/AllSubscription/:packageId').get(subscriptionController.getAllPackageSubscriptions)
 
 module.exports = subscriptionsRouter;
