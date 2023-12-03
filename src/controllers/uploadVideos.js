@@ -85,7 +85,7 @@ exports.uploadVideo = async (req, res) => {
   });
   } catch (error) {
     console.error("Error uploading video:", error);
-    res.status(500).json({ message: "Error while uploading video" });
+    res.status(500).json({ message: "Error while uploading video", error:error });
   }
 };
 exports.deleteVideo = async (req, res) => {
