@@ -2342,29 +2342,98 @@ exports.stopRecording = async (req, res) => {
     });
 };
 exports.updateSubMinutes = async (req, res, next) => {
-  // Capture the start time from the request body
-  const startTime = new Date(req.body.startTime); // Assuming you sent the start time when recording began
-  const endTime = new Date(req.body.endTime);
-  const durationInSeconds = (endTime - startTime) / 1000; // Duration in seconds
+  try {
+    const startTime = new Date(req.body.startTime);
+    const endTime = new Date(req.body.endTime);
 
-  //update the subscription in database.
-  const AllSubscriptions = await auctionSubscription
-    .find({ userId: req.body.userId })
-    .sort({ createdAt: -1 });
-  console.log(AllSubscriptions);
-  const lastSubscription = AllSubscriptions[0];
-  const usedMinutes = durationInSeconds / 60;
-  const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(
-    lastSubscription.id,
-    { $inc: { usedMinutes: usedMinutes } },
-    { new: true }
-  );
+   
 
-  res.status(200).setHeader("Content-Type", "application/json").json({
-    status: "success",
-    updatedSubscription: updatedUsedMinutes,
-  });
+    const durationInSeconds = (endTime - startTime) / 1000;
+
+    const allSubscriptions = await auctionSubscription
+      .find({ userId: req.body.userId })
+      .sort({ createdAt: -1 });
+
+    if (allSubscriptions.length === 0) {
+      return res.status(422).json({
+        status: "No subscriptions found for the user",
+      });
+    }
+
+    const lastSubscription = allSubscriptions[0];
+    const usedMinutes = durationInSeconds / 60;
+
+    if (usedMinutes > lastSubscription.numberOfMinutes) {
+      return res.status(422).json({
+        status: "You need more minutes in your package",
+      });
+    }
+
+    const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(
+      lastSubscription.id,
+      { $inc: { usedMinutes: usedMinutes,numberOfMinutes:-usedMinutes } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      updatedSubscription: updatedUsedMinutes,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
 };
+
+//update video minutes
+exports.updateSubMinutesForVideo = async (req, res, next) => {
+  try {
+    const durationInSeconds = req.body.videoDuration;
+    const userId = req.body.userId;
+
+
+    // Retrieve subscriptions
+    const allSubscriptions = await auctionSubscription
+      .find({ userId })
+      .sort({ createdAt: -1 });
+
+    if (allSubscriptions.length === 0) {
+      return res.status(422).json({
+        status: "No subscriptions found for the user",
+      });
+    }
+
+    const lastSubscription = allSubscriptions[0];
+    const usedMinutes = durationInSeconds / 60;
+
+    if (usedMinutes > lastSubscription.numberOfMinutes) {
+      return res.status(422).json({
+        status: "You need more minutes in your package",
+      });
+    }
+
+    const updatedUsedMinutes = await auctionSubscription.findByIdAndUpdate(
+      lastSubscription.id,
+      { $inc: { usedMinutes: usedMinutes,numberOfMinutes:-usedMinutes } },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      updatedSubscription: updatedUsedMinutes,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};
+
 const startRecording = async (resourceid, uid, channelname, token) => {
   var settingsresponse = await functions.getSettings();
 

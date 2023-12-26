@@ -41,6 +41,8 @@ roomRouter.route("/stoprecording/:sid").post(roomController.stopRecording);
 
 roomRouter.route("/update-subscription-minutes").patch(roomController.updateSubMinutes)
 
+roomRouter.route("/updateVideo-subscription-minutes").patch(roomController.updateSubMinutesForVideo)
+
 roomRouter.route("/record/:channelname").post(roomController.recordRoom);
 
 roomRouter.route("/get/all/:userId").get(roomController.getRoomsByUserId);
