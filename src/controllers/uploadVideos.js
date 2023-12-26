@@ -52,7 +52,7 @@ exports.uploadVideo = async (req, res) => {
         containerName: containerName,
         permissions: ContainerSASPermissions.parse("racwd"), // Adjust permissions as needed
         startsOn: new Date(),
-        expiresOn: new Date(new Date().valueOf() + 86400 * 365 * 1000), // Extend the expiry time by 7 days (in milliseconds)
+        expiresOn: new Date(new Date().valueOf() + 86400 * 365 * 1000), // Extend the expiry time by 
         
       },
       sharedKeyCredential 
