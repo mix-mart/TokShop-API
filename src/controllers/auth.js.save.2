@@ -74,8 +74,7 @@ exports.mobileLoginRegisterWithSocial = async (req, res, next) => {
     .populate("interest");
   if (user.length > 0) {
     console.log("one", user[0]);
-	  const apptoken = createtoken(user[0]._id);
- admin
+	    admin
       .auth()
       .createCustomToken(user[0]._id.toString())
       .then(async (customToken) => {
@@ -86,7 +85,6 @@ exports.mobileLoginRegisterWithSocial = async (req, res, next) => {
           data: user[0],
           accessToken: token,
           newuser: false,
-apptoken:apptoken
         });
       })
       .catch((error) => {
@@ -128,8 +126,7 @@ apptoken:apptoken
       })
       .populate("channel")
       .populate("interest");
-    console.log("added ", added); 
-const apptoken = createtoken(added._id);
+    console.log("added ", added);
     admin
       .auth()
       .createCustomToken(added._id.toString())
@@ -142,7 +139,6 @@ const apptoken = createtoken(added._id);
           data: added,
           accessToken: token,
           newuser: true,
-apptoken:apptoken
         });
       })
       .catch((error) => {
@@ -412,4 +408,3 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     message: "Password reset successful!",
   });
 });
-

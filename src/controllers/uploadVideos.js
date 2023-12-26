@@ -28,6 +28,7 @@ const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.cor
 
 
 exports.uploadVideo = async (req, res) => {
+	console.log(req.file);
   try {
     // Upload video to Azure Blob Storage
     const containerClient = blobServiceClient.getContainerClient(containerName);
