@@ -20,7 +20,7 @@ exports.createLivePackage = async (req, res) => {
 
 exports.getAllLivePackages = async (req, res) => {
   try {
-    const packages = await livePackges.find();
+    const packages = await livePackges.find({isActive: true});
     res.status(200).json({ result: packages.length, Data: packages });
   } catch (error) {
     res.status(400).json({ error: error.message });
