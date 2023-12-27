@@ -30,6 +30,19 @@ exports.getPackage=async(req,res,next)=>{
 
 exports.getAllPackage=async(req,res,next)=>{
     try{
+        const packages =await prodPackage.find();
+    // console.log(packages)
+    if(!packages){
+        return next(new AppError('packages not found.', 404)) 
+    }
+    res.status(200).json({success: true,result:packages.length,data:packages})
+    }catch(err){
+        return next(new AppError('packages not found.', 404)) 
+    }
+}
+
+exports.getAllActivePackage=async(req,res,next)=>{
+    try{
         const packages =await prodPackage.find({isActive: true});
     // console.log(packages)
     if(!packages){

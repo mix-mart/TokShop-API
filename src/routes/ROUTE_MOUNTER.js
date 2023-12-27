@@ -32,6 +32,7 @@ const uploadVideoRoute = require('./uploadVideoRoute')
 
 
 const passport = require("passport");
+const { getAllActivePackage } = require("../controllers/packages");
 
 require("../services/authenticate");
 module.exports = app = express();
@@ -57,6 +58,8 @@ app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
 app.use("/livePackges", LivePackageRouter);
 app.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
+app.get("/prodPackages/active" , getAllActivePackage);
+app.get("/livePackages/active" , livePackageController.getAllActiveLivePackages);
 app.use("/videos", uploadVideoRoute);
 
 app.use(
