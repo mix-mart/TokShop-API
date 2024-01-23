@@ -6,7 +6,7 @@ const authController = require('../controllers/auth');
 const coordinatesRouter = express.Router();
 
 coordinatesRouter.use(authController.protect)
-coordinatesRouter.route('/').patch(coordinatesController.updateUserCoordinates).get(coordinatesController.getUserCoordinates)
+coordinatesRouter.route('/').patch(coordinatesController.updateProductCoordinates).get(coordinatesController.getProductCoordinates)
 
 
 

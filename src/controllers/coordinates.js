@@ -1,33 +1,38 @@
-const UserModel = require('../models/userSchema');
+const productModel = require('../models/productSchema');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 
-exports.updateUserCoordinates = catchAsync(async (req, res, next) => {
-    const userId = req.user.id;
+exports.updateProductCoordinates = catchAsync(async (req, res, next) => {
+    const productId = req.body.productId;
+    const product = await productModel.findById(productId);
+    if (!product) {
+        return next(new AppError("invalid product id.", 500))
+    }
     const { longitude, latitude } = req.body;
     if (!longitude || !latitude) {
         return next(new AppError("you must provide both longitude and latitude.", 500))
     }
-    const updatedUser = await UserModel.findByIdAndUpdate(userId, { coordinates: { longitude, latitude } }, { new: true });
+    const updatedproduct = await productModel.findByIdAndUpdate(productId, { coordinates: { longitude, latitude } }, { new: true });
     res.status(200).json({
         status: 'success',
         data: {
-            updatedUser
+            updatedproduct
         }
     })
 })
-exports.getUserCoordinates = catchAsync(async (req, res, next) => {
-    const userId = req.user.id;
+exports.getProductCoordinates = catchAsync(async (req, res, next) => {
+    const productId = req.body.productId;
 
-    if (!userId) {
-        return next(new AppError("you must login first.", 500))
+   
+    const product = await productModel.findById(productId);
+    if (!product) {
+        return next(new AppError("invalid product id.", 500))
     }
-    const user = await UserModel.findById(userId);
     res.status(200).json({
         status: 'success',
         data: {
-            user
+            product
         }
     })
 })

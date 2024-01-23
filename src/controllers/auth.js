@@ -298,6 +298,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
+  
   const User = await userModel.findOne({ userName: req.body.userName });
 
   if (!User || !(await bcrypt.compare(req.body.password, User.password))) {
