@@ -72,6 +72,18 @@ const productSchema = new Schema(
       required: true,
       ref: "user",
     },
+    coordinates: {
+      latitude: {
+        type: String,
+        required: true,
+        default: 30.033333
+      },
+      longitude: {
+        type: String,
+        required: true,
+        default: 31.233334
+      }
+    },
     type: {
       type: String,
       default: "tokshop",
@@ -79,6 +91,8 @@ const productSchema = new Schema(
     videoUrlWithSAS:String,
     blobName:String,
   },
+
+  
   { timestamps: true, autoIndex: true, autoCreate: true }
 );
 
