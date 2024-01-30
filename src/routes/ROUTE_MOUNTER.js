@@ -1,4 +1,5 @@
 const express = require("express");
+const nodemailer = require('nodemailer');
 const authRouter = require("./authRoutes");
 const userRouter = require("./userRoutes");
 const orderRouter = require("./orderRoutes");
@@ -34,6 +35,7 @@ const uploadVideoRoute = require('./uploadVideoRoute')
 
 const passport = require("passport");
 const { getAllActivePackage } = require("../controllers/packages");
+const { sendmail } = require("../controllers/froBlog");
 // const { app } = require("firebase-admin");
 
 require("../services/authenticate");
@@ -109,5 +111,9 @@ app.use(
 app.use("/coordinates",
   // passport.authenticate("jwt", { session: false }),
   coordinatesRouter
-)
+);
+
+
+
+app.post('/receive-email', sendmail);
 
