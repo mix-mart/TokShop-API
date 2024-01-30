@@ -128,7 +128,7 @@ exports.updateBlogImages = async (req, res) => {
 
 
   exports.sendmail=asyncHandler(async(req, res) => {
-      const { name, email, message } = req.body;
+      const { name, email, message,phone } = req.body;
     
       // Create a nodemailer transporter with your email service provider's SMTP details
       const transporter = nodemailer.createTransport({
@@ -145,7 +145,7 @@ exports.updateBlogImages = async (req, res) => {
         from: 'sales@frozal.com', // replace with your email
         to: 'Info@frozal.com', // replace with the recipient's email
         subject: message,
-        text: `Name: ${name}\n Email: ${email}\nMessage: ${message}`
+        text: `Phone: ${phone}\nName: ${name}\n Email: ${email}\nMessage: ${message}`
       };
     
       // Send the email
