@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const AppError = require("../utils/appError");
 const path = require('path');
 const froBlog = require("../models/froblogModel");
+const nodemailer = require('nodemailer');
 
 exports.createFroBlog = asyncHandler(async (req, res, next) => {
     try {
@@ -124,3 +125,38 @@ exports.updateBlogImages = async (req, res) => {
         .json({ success: false, message: error + " " });
     }
   };
+
+
+  exports.sendmail=asyncHandler(async(req, res) => {
+      const { name, email, message } = req.body;
+    
+      // Create a nodemailer transporter with your email service provider's SMTP details
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.hostinger.com',
+        port:'465',
+        auth: {
+          user: 'sales@frozal.com', // replace with your email
+          pass: 'Sales1212@@' // replace with your email password or use an app-specific password
+        }
+      });
+    
+      // Email configuration
+      const mailOptions = {
+        from: 'sales@frozal.com', // replace with your email
+        to: 'Info@frozal.com', // replace with the recipient's email
+        subject: message,
+        text: `Name: ${name}\n Email: ${email}\nMessage: ${message}`
+      };
+    
+      // Send the email
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error');
+        } else {
+          console.log('Email sent: ' + info.response);
+          res.status(200).send('Email sent successfully');
+        }
+      });
+    }
+  )

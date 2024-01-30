@@ -26,4 +26,5 @@ const router = express.Router();
 router.route('/').get(getAllFroBlog).post(upload.array('images', 5),createFroBlog);
 router.route('/:id').get(getOne).put(updateFroBlog).delete(deleteFroBlog);
 
+
 module.exports = router;
