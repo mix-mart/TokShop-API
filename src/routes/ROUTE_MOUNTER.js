@@ -25,6 +25,7 @@ const packageRouter = require("./packageRoute");
 const LivePackageRouter = require('./livePackgesRoute')
 const coordinatesRouter = require('./coordinatesRoute');
 const couponRoute = require('./couponRoute')
+const froBlogRoute =require('./froBlogRoute')
 const authController = require('../controllers/auth')
 const livePackageController = require('../controllers/livePackges');
 
@@ -33,9 +34,11 @@ const uploadVideoRoute = require('./uploadVideoRoute')
 
 const passport = require("passport");
 const { getAllActivePackage } = require("../controllers/packages");
+// const { app } = require("firebase-admin");
 
 require("../services/authenticate");
-module.exports = app = express();
+
+module.exports= app =express();
 
 app.use("/", authRouter);
 app.use("/users", userRouter);
@@ -56,6 +59,7 @@ app.use("/auction", auctionRouter);
 app.use("/stripe", stripeRouter);
 app.use("/packages", packageRouter);
 app.use('/coupons', couponRoute);
+app.use('/froBlog',froBlogRoute);
 app.use("/livePackges", LivePackageRouter);
 app.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
 app.get("/prodPackages/active" , getAllActivePackage);
