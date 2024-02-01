@@ -160,3 +160,14 @@ exports.updateBlogImages = async (req, res) => {
       });
     }
   )
+
+  exports.froProtect=asyncHandler(async(req,res,next)=>{
+    const checkpass='Mskr1212@@';
+    if(req.body.pass!==checkpass){
+      return next(new AppError(`login failed`, 404));
+
+    }
+
+    res.status(200).json("sucssfully login")
+
+  });
