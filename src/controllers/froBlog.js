@@ -59,16 +59,36 @@ exports.createFroBlog = asyncHandler(async (req, res, next) => {
   }
 });
 
-exports.deleteFroBlog = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const deletedBlog = await froBlog.findByIdAndDelete(id);
+exports.deleteFroBlog = asyncHandler(async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const blog=await froBlog.findById(id);
+    const deletedBlog = await froBlog.findByIdAndDelete(id);
 
-  if (!deletedBlog) {
-    return next(new AppError(`No Blog for this id ${id}`, 404));
+    if (!deletedBlog) {
+      return next(new AppError(`No Blog for this id ${id}`, 404));
+    }
+
+ 
+const public_id=`blog_images/${blog._id}`
+   
+      // Delete the image from Cloudinary
+      try {
+        const destroyResponse = await cloudinary.uploader.destroy(public_id);
+        console.log('Cloudinary Delete Response:', destroyResponse);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary Delete Error:', cloudinaryError);
+        // Handle the Cloudinary error appropriately
+        return next(new AppError('Error deleting image from Cloudinary', 500));
+      }
+    
+
+    res.status(204).send("Deleted successfully");
+  } catch (error) {
+    console.error('Error deleting blog:', error);
+    return next(new AppError('Internal server error', 500));
   }
-  res.status(204).send("deleted sucssfully");
 });
-
 exports.updateFroBlog = asyncHandler(async (req, res, next) => {
   const document = await froBlog.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
