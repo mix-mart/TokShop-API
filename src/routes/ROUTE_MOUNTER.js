@@ -67,7 +67,7 @@ app.get("/is-subscription-valid", authController.protect, livePackageController.
 app.get("/prodPackages/active" , getAllActivePackage);
 app.get("/livePackages/active" , livePackageController.getAllActiveLivePackages);
 app.use("/videos", uploadVideoRoute);
-
+app.use("/coordinates",coordinatesRouter);
 app.use(
   "/address",
   passport.authenticate("jwt", { session: false }),
