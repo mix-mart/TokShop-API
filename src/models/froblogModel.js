@@ -15,9 +15,9 @@ const froblogSchema = new Schema({
     required: [true, 'Product description is required'],
     minlength: [20, 'Too short product description'],
   },
-  images: {
+  image: {
     type: Array,
-    required: [true, 'Product Images  is required'],
+    required: [true, 'Product Image  is required'],
   },
 
 

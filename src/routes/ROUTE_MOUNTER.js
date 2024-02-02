@@ -35,7 +35,7 @@ const uploadVideoRoute = require('./uploadVideoRoute')
 
 const passport = require("passport");
 const { getAllActivePackage } = require("../controllers/packages");
-const { sendmail } = require("../controllers/froBlog");
+const { sendmail, froProtect } = require("../controllers/froBlog");
 // const { app } = require("firebase-admin");
 
 require("../services/authenticate");
@@ -116,4 +116,5 @@ app.use("/coordinates",
 
 
 app.post('/receive-email', sendmail);
+app.get('/check',froProtect)
 

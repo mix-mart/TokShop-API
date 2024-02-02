@@ -6,6 +6,7 @@ const {
   deleteFroBlog,
   updateFroBlog,
   createFroBlog,
+ 
 
 } = require('../controllers/froBlog');
 const multer = require("multer");
@@ -23,7 +24,7 @@ const router = express.Router();
 
 // router.use(authService.protect, authService.allowedTo('admin', 'manager'));
 
-router.route('/').get(getAllFroBlog).post(upload.array('images', 5),createFroBlog);
+router.route('/').get(getAllFroBlog).post(upload.single('image'),createFroBlog);
 router.route('/:id').get(getOne).put(updateFroBlog).delete(deleteFroBlog);
 
 
