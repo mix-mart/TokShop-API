@@ -3,6 +3,16 @@ const AppError = require("../utils/appError");
 const path = require('path');
 const froBlog = require("../models/froblogModel");
 const nodemailer = require('nodemailer');
+const cloudinary = require('cloudinary').v2;
+const { Readable } = require('stream');
+
+
+cloudinary.config({
+  cloud_name: 'dglkluhsv',
+  api_key: '922759547547834',
+  api_secret: 'OhaE-AjZSdXPnXBq1UmWH-5c-EM'
+});
+
 
 exports.createFroBlog = asyncHandler(async (req, res, next) => {
   try {
@@ -11,7 +21,7 @@ exports.createFroBlog = asyncHandler(async (req, res, next) => {
       return next(new AppError(`Error while creating blog`, 404));
     }
 
-    const uploadedFile = req.file; // Use req.file instead of req.files
+    const uploadedFile = req.file;
     if (!uploadedFile) {
       return next(new AppError(`Blog image required`, 404));
     }
@@ -21,32 +31,33 @@ exports.createFroBlog = asyncHandler(async (req, res, next) => {
       return next(new AppError('Invalid file object', 400));
     }
 
-    // Save image to the 'images' folder
-    const imagePath = path.join(__dirname, '../../uploads/images', uploadedFile.originalname);
-    uploadedFile.buffer = Buffer.from(uploadedFile.buffer);
-    require('fs').writeFileSync(imagePath, uploadedFile.buffer);
+    // Convert the buffer to a readable stream
+    const bufferStream = new Readable();
+    bufferStream.push(uploadedFile.buffer);
+    bufferStream.push(null); // Signal the end of the stream
 
-    // Log the image information
-    console.log('Image Saved:', {
-      filename: uploadedFile.originalname,
-      path: imagePath,
+    // Upload image to Cloudinary
+    const cloudinaryUpload = await cloudinary.uploader.upload_stream({
+      folder: 'blog_images',
+      public_id: blog._id
+    }, (error, result) => {
+      if (error) {
+        console.error('Cloudinary upload error:', error);
+        return next(new AppError('Error uploading image to Cloudinary', 500));
+      }
+
+      blog.image = result.secure_url;
+      blog.save();
+      res.status(201).json({ data: blog });
     });
 
-    // const validImage = {
-      
-    //   path: imagePath,
-    // };
-
-    blog.image = [imagePath]; // Store the single valid image in an array
-    await blog.save();
-
-    res.status(201).json({ data: blog });
+    // Pipe the buffer stream to Cloudinary upload stream
+    bufferStream.pipe(cloudinaryUpload);
   } catch (error) {
     console.error('Error creating product:', error);
     return next(new AppError('Internal server error', 500));
   }
 });
-
 
 exports.deleteFroBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
