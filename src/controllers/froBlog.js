@@ -5,59 +5,48 @@ const froBlog = require("../models/froblogModel");
 const nodemailer = require('nodemailer');
 
 exports.createFroBlog = asyncHandler(async (req, res, next) => {
-    try {
-      const blog = await froBlog.create(req.body);
-      if (!blog) {
-        return next(new AppError(`Error while creating blog`, 404));
-      }
-  
-      const uploadedFiles = req.files;
-      if (!uploadedFiles) {
-        return next(new AppError(`blog images required`, 404));
-      }
-  
-      const savedImages = await Promise.all(
-        uploadedFiles.map(async (file) => {
-          if (!file.originalname || !file.buffer || !file.mimetype) {
-            console.error('Invalid file object:', file);
-            return null;
-          }
-  
-          // Save image to the 'images' folder
-          const imagePath = path.join(__dirname, '../../uploads/images', file.originalname);
-          file.buffer = Buffer.from(file.buffer);
-          require('fs').writeFileSync(imagePath, file.buffer);
-  
-          // Log the image information
-          console.log('Image Saved:', {
-            filename: file.originalname,
-            path: imagePath,
-           
-          });
-  
-          return {
-            filename: file.originalname,
-            path: imagePath,
-          
-          };
-        })
-      );
-  
-      // Log the saved images
-      console.log('Saved Images:', savedImages);
-  
-      // Filter out null values (invalid files)
-      const validImages = savedImages.filter((image) => image !== null);
-  
-      blog.images = validImages;
-      await blog.save();
-  
-      res.status(201).json({ data: blog });
-    } catch (error) {
-      console.error('Error creating product:', error);
-      return next(new AppError('Internal server error', 500));
+  try {
+    const blog = await froBlog.create(req.body);
+    if (!blog) {
+      return next(new AppError(`Error while creating blog`, 404));
     }
-  });
+
+    const uploadedFile = req.file; // Use req.file instead of req.files
+    if (!uploadedFile) {
+      return next(new AppError(`Blog image required`, 404));
+    }
+
+    if (!uploadedFile.originalname || !uploadedFile.buffer || !uploadedFile.mimetype) {
+      console.error('Invalid file object:', uploadedFile);
+      return next(new AppError('Invalid file object', 400));
+    }
+
+    // Save image to the 'images' folder
+    const imagePath = path.join(__dirname, '../../uploads/images', uploadedFile.originalname);
+    uploadedFile.buffer = Buffer.from(uploadedFile.buffer);
+    require('fs').writeFileSync(imagePath, uploadedFile.buffer);
+
+    // Log the image information
+    console.log('Image Saved:', {
+      filename: uploadedFile.originalname,
+      path: imagePath,
+    });
+
+    // const validImage = {
+      
+    //   path: imagePath,
+    // };
+
+    blog.image = [imagePath]; // Store the single valid image in an array
+    await blog.save();
+
+    res.status(201).json({ data: blog });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    return next(new AppError('Internal server error', 500));
+  }
+});
+
 
 exports.deleteFroBlog = asyncHandler(async (req, res) => {
   const { id } = req.params;
