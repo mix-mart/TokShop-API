@@ -152,7 +152,8 @@ exports.updateBlogImages = async (req, res) => {
 
   exports.froProtect=asyncHandler(async(req,res,next)=>{
     const checkpass='Mskr1212@@';
-    if(req.body.pass!==checkpass){
+    const user='admin';
+    if(req.body.pass!==checkpass || req.body.userName !==user){
       return next(new AppError(`login failed`, 404));
 
     }
