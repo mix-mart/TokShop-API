@@ -116,5 +116,5 @@ app.use("/coordinates",
 
 
 app.post('/receive-email', sendmail);
-app.get('/check',froProtect)
+app.post('/check',froProtect)
 
