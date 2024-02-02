@@ -19,6 +19,7 @@ const froblogSchema = new Schema({
     type: Array,
     required: [true, 'Product Image  is required'],
   },
+ 
 
 
   
