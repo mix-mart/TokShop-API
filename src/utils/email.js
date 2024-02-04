@@ -19,7 +19,7 @@ module.exports = class Email {
         return nodemailer.createTransport({
             host: "smtp.office365.com",
              secure: false,
-            port: 143,
+            port: 993,
             domain: 'mix-mart.online',
             auth: {
                 user: "info@mix-mart.online",
