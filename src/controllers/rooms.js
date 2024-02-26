@@ -897,8 +897,8 @@ exports.getActiveTokshows = async (req, res) => {
 
     queryObject.$or = [
       {
-        roomType: "public",
-        event: event ?? false,
+     //   roomType: "public",
+       // event: event ?? false,
         ended: false,
       },
     ];
@@ -2853,8 +2853,8 @@ exports.getAllEvents = async (req, res) => {
     let rooms = await roomsModel
       .find({
         $and: [
-          { event: { $eq: true } },
-          { eventDate: { $gte: Date.now() * 1 } },
+      //    { event: { $eq: true } },
+        //  { eventDate: { $gte: Date.now() * 1 } },
           { ended: false },
         ],
       })

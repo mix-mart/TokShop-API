@@ -5,6 +5,8 @@ const catchAsync = require('../utils/catchAsync');
 
 exports.updateProductCoordinates = catchAsync(async (req, res, next) => {
     const productId = req.body.productId;
+    const location = req.body.location;
+
     const product = await productModel.findById(productId);
     if (!product) {
         return next(new AppError("invalid product id.", 500))
@@ -13,7 +15,7 @@ exports.updateProductCoordinates = catchAsync(async (req, res, next) => {
     if (!longitude || !latitude) {
         return next(new AppError("you must provide both longitude and latitude.", 500))
     }
-    const updatedproduct = await productModel.findByIdAndUpdate(productId, { coordinates: { longitude, latitude } }, { new: true });
+    const updatedproduct = await productModel.findByIdAndUpdate(productId, { coordinates: { longitude, latitude },location:location }, { new: true });
     res.status(200).json({
         status: 'success',
         data: {

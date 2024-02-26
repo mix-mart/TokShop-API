@@ -305,9 +305,33 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new AppError("incorect usrName or password", 401));
   }
 
-  const token = createtoken(User._id);
+        const accesstoken = jwt.sign(User.email, process.env.secret_key);
 
-  res.status(200).json({ data: User, token });
+//  console.log("one", User._id);
+  
+//const token = createtoken(User._id);
+
+  //res.status(200).json({ data: User, token,accesstoken });
+
+const token = createtoken(User._id);
+admin
+      .auth()
+      .createCustomToken(User._id.toString())
+      .then(async (customToken) => {
+        const accessToken = jwt.sign(User.email, process.env.secret_key);
+
+        res.status(200).json({
+          authtoken: customToken,
+          success: true,
+          data: User,
+          accessToken: accessToken,
+          newuser: false,
+apptoken:token
+        });
+      })
+      .catch((error) => {
+        res.status(400).json({ success: false });
+      });
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
