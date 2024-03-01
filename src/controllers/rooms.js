@@ -898,7 +898,7 @@ exports.getActiveTokshows = async (req, res) => {
     queryObject.$or = [
       {
      //   roomType: "public",
-       // event: event ?? false,
+        event: event ?? false,
         ended: false,
       },
     ];
