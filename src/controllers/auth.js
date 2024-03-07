@@ -341,28 +341,46 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       new AppError("There is no user with such email address!!", 404)
     );
   }
-  const resetToken = await user.createPasswordResetToken();
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-  await user.save({ validateBeforeSave: false });
+
+
+    // 2) If user exist, Generate hash reset random 6 digits and save it in db
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedResetCode = crypto
+      .createHash('sha256')
+      .update(resetCode)
+      .digest('hex');
+
+
+        // Save hashed password reset code into db
+  user.passwordResetCode = hashedResetCode;
+  // Add expiration time for password reset code (10 min)
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  user.passwordResetVerified = false;
+
+  await user.save();
+  // const resetToken = await user.createPasswordResetToken();
+  // const hashedToken = crypto
+  //   .createHash('sha256')
+  //   .update(resetToken)
+  //   .digest('hex');
+  // await user.save({ validateBeforeSave: false });
 
   //FIXME:
   try {
-    const resetURL = `${req.protocol}://${req.get(
-      "host"
-    )}/users/reset-password/${resetToken}`;
-    await new Email(user, resetURL).sendPasswordReset(res);
+    // const resetURL = `${req.protocol}://${req.get(
+    //   "host"
+    // )}/users/reset-password/${resetToken}`;
+    await new Email(user, resetCode).sendPasswordReset(res);
     res.status(200).json({
       status: "success",
       message: "reset token sent to your email",
       // resetToken,
-      hashedToken,
+      // resetCode,
     });
   } catch (err) {
-    user.passwordResetToken = undefined;
+    user.passwordResetCode = undefined;
     user.passwordResetExpires = undefined;
+    user.passwordResetVerified = undefined;
     await user.save({ validateBeforeSave: false });
     console.log(err);
     return next(
@@ -373,6 +391,31 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     );
   }
 });
+
+exports.verifyPassResetCode = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on reset code
+  const hashedResetCode = crypto
+    .createHash('sha256')
+    .update(req.body.resetCode)
+    .digest('hex');
+
+  const user = await userModel.findOne({
+    passwordResetCode: hashedResetCode,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError('Reset code invalid or expired',500));
+  }
+
+  // 2) Reset code valid
+  user.passwordResetVerified = true;
+  await user.save();
+
+  res.status(200).json({
+    status: 'Success',
+  });
+});
+
 
 exports.changePassword = asyncHandler(async (req, res, next) => {
   // Get the logged-in user's ID from the JWT token
@@ -411,30 +454,28 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.resetPassword = catchAsync(async (req, res, next) => {
-  // const hashedToken = crypto
-  //   .createHash('sha256')
-  //   .update(req.params.token)
-  //   .digest('hex');
-  // Find user by reset token
-  const user = await userModel.findOne({
-    passwordResetToken: req.params.token,
-    passwordResetExpires: { $gt: Date.now() },
-  });
-
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  // 1) Get user based on email
+  const user = await userModel.findOne({ email: req.body.email });
   if (!user) {
-    return next(new AppError("Invalid or expired reset token", 400));
+    return next(
+      new AppError(`There is no user with email ${req.body.email}`, 404)
+    );
   }
 
-  // Update password and remove reset token
-  user.password = req.body.password;
-  user.passwordResetToken = undefined;
+  // 2) Check if reset code verified
+  if (!user.passwordResetVerified) {
+    return next(new AppError('Reset code not verified', 400));
+  }
+
+  user.password = req.body.newPassword;
+  user.passwordResetCode = undefined;
   user.passwordResetExpires = undefined;
+  user.passwordResetVerified = undefined;
+
   await user.save();
 
-  res.status(200).json({
-    status: "success",
-    message: "Password reset successful!",
-  });
+  // 3) if everything is ok, generate token
+  const token = createtoken(user._id);
+  res.status(200).json({ token });
 });
-

@@ -190,10 +190,11 @@ userRouter.route("/login").post(login)
 
 userRouter.route('/signup').post(authController.signUp);
 userRouter.route('/forgot-my-password').post(authController.forgotPassword)
+userRouter.post('/verifyResetCode', authController.verifyPassResetCode);
 userRouter.route('/update/password').put(authController.protect, authController.changePassword)
 
 // Route for resetting password using the reset token
-userRouter.post('/reset-password/:token', authController.resetPassword);
+userRouter.post('/reset-password', authController.resetPassword);
 // userRouter.post("/is-subscription-valid/", authController.protect, subscriptionController.isSubscriptionValid);
 
 

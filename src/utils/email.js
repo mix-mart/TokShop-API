@@ -3,11 +3,11 @@ const pug = require('pug');
 const { htmlToText } = require('html-to-text');
 
 module.exports = class Email {
-    constructor(user, url) {
+    constructor(user, resetCode) {
         this.to = user.email;
         // this.firstname = user.user_name.split(' ')[0];
         this.firstname = user.firstName;
-        this.url = url;
+        this.resetCode = resetCode;
         this.from = `Mix Mart <info@mix-mart.online>`;
     }
 
@@ -38,7 +38,7 @@ module.exports = class Email {
             `${__dirname}/../views/emails/${template}.pug`,
             {
                 firstName: this.firstname,
-                url: this.url,
+                resetCode: this.resetCode,
                 subject
             }
         );
