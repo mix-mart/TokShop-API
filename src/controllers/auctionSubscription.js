@@ -83,12 +83,7 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     if (remainingMinutes == 0) {
         return next(new AppError('you are run out of minutes, please go and renew your subscription or buy more!', 500))
     }
-    if (lastSubscription.status=="Pending") {
-        return next(new AppError('Your subscription Pending please wait.', 500))
-    }
-    if (lastSubscription.status=="Failed") {
-        return next(new AppError('Your subscription failed .', 500))
-    }
+   
    
 
 
