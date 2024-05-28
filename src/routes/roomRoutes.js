@@ -1,4 +1,5 @@
 const express = require("express");
+
 const roomController = require("../controllers/rooms");
 const roomRouter = express.Router();
 const roomsModel = require("../models/roomSchema");

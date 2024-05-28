@@ -1,3 +1,4 @@
+const { subscribe } = require("diagnostics_channel");
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
@@ -18,6 +19,12 @@ const auctionSubscriptionSchema = new Schema(
             type: String,
             required: [true, 'you must provide details about the subscription transaction process.']
         },
+        subscripImage: {
+            type: String,
+          },
+          phone: {
+            type: Number,
+          },
         type: {
             type: String,
             enum: ["subscribe", "unsubscribe", "renew"],
@@ -27,6 +34,7 @@ const auctionSubscriptionSchema = new Schema(
             type: String,
             enum: ["Pending", "Completed", "Failed"],
             required: [true, 'The subscription transaction must have a status either of Pending, Completed or Failed.'],
+            default:"Pending"
         },
         deduction: {
             type: Boolean,

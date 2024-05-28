@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcrypt");
 const decode = require("../shared/base64");
-const crypto = require('crypto');
+const crypto = require("crypto");
 const value = {
   type: String,
   required: [true, "This field is required"],
@@ -56,7 +56,7 @@ const userSchema = new Schema(
     },
     followersCount: {
       type: Number,
-      default: 0
+      default: 0,
     },
     followingCount: {
       type: Number,
@@ -189,24 +189,24 @@ const userSchema = new Schema(
       latitude: {
         type: String,
         required: true,
-        default: 30.033333
+        default: 30.033333,
       },
       longitude: {
         type: String,
         required: true,
-        default: 31.233334
-      }
+        default: 31.233334,
+      },
     },
     ip: {
-      type:String,
-      default:null
+      type: String,
+      default: null,
     },
     macAddress: {
-      type:String,
-      default:null
-    }
+      type: String,
+      default: null,
+    },
   },
-  
+
   {
     timestamps: true,
     autoCreate: true, // auto create collection
@@ -241,13 +241,12 @@ userSchema.methods.isValidPassword = async function (password) {
   const compare = await bcrypt.compare(password, user.password);
   return compare;
 };
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   // Hashing user password
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
-
 
 userSchema.methods.createPasswordResetToken = async function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
@@ -259,7 +258,6 @@ userSchema.methods.createPasswordResetToken = async function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };
-
 
 const users = model("user", userSchema);
 module.exports = users;

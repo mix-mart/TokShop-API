@@ -38,7 +38,7 @@ app.use("/public/img", express.static(path.join(__dirname, "public/img")));
 var server = http.createServer(app);
 
 server.listen(process.env.PORT, function () {
-  _createSuperAdmin();
+   _createSuperAdmin();
   console.log("Tokshop server listening on port " + process.env.PORT);
 });
 

@@ -4,6 +4,10 @@ const UserModel = require('../models/userSchema');
 const Product = require('../models/productSchema');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const cloudinary = require('../config/cloudinary');
+const { v4: uuidv4 } = require('uuid');
+const admin = require('firebase-admin');
+
 
 exports.subscribe = catchAsync(async (req, res, next) => {
     // const userId = req.user.id;
@@ -89,6 +93,16 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     if (lastSubscription.expiryDate.getTime() < Date.now()) {
         return next(new AppError('Your subscription has been expired! please, go and renew you subscription.', 500))
     }
+    if (lastSubscription.status=="Pending") {
+        return next(new AppError('Your subscription Pending please wait.', 500))
+    }
+    if (lastSubscription.status=="Failed") {
+        return next(new AppError('Your subscription failed .', 500))
+    }
+   
+
+
+
 
     // res.status(200).json(AllSubscriptions)
     res.status(200).json({
@@ -98,3 +112,34 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     })
 
 })
+
+exports.updateSubscrip = catchAsync(async (req, res, next) => {
+    const document = await Subscription.findByIdAndUpdate(req.params.subscriptionId, req.body, {
+      new: true,
+    });
+  
+    if (!document) {
+      return next(new AppError(`No document for this id ${req.params.subscriptionId}`, 404));
+    }
+  
+    if (req.file) {
+      const uniqueFilename = `subscriptions/${uuidv4()}-${req.file.originalname}`;
+  
+      // Upload to Cloudinary
+      cloudinary.uploader.upload_stream({ 
+        resource_type: 'image',
+        public_id: uniqueFilename,
+      }, async (error, result) => {
+        if (error) {
+          return next(new AppError('Failed to upload image to Cloudinary', 500));
+        }
+  
+        document.subscripImage = result.secure_url;
+        await document.save();
+  
+        res.status(200).json({ data: document });
+      }).end(req.file.buffer);
+    } else {
+      res.status(200).json({ data: document });
+    }
+  });

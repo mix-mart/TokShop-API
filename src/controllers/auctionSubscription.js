@@ -4,6 +4,9 @@ const UserModel = require('../models/userSchema');
 const Product = require('../models/productSchema');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const cloudinary = require('../config/cloudinary');
+const { v4: uuidv4 } = require('uuid');
+
 
 exports.subscribe = catchAsync(async (req, res, next) => {
     // const userId = req.user.id;
@@ -80,6 +83,15 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     if (remainingMinutes == 0) {
         return next(new AppError('you are run out of minutes, please go and renew your subscription or buy more!', 500))
     }
+    if (lastSubscription.status=="Pending") {
+        return next(new AppError('Your subscription Pending please wait.', 500))
+    }
+    if (lastSubscription.status=="Failed") {
+        return next(new AppError('Your subscription failed .', 500))
+    }
+   
+
+
     // const packageId = AllSubscriptions[0].packageId;
     // const package = await LivePackage.findById(packageId);
 
@@ -98,3 +110,37 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
     next();
 
 })
+
+exports.updateLiveSubscrip = catchAsync(async (req, res, next) => {
+    const document = await auctionSubscription.findByIdAndUpdate(req.params.subscriptionId, req.body, {
+      new: true,
+    });
+  
+    if (!document) {
+      return next(new AppError(`No document for this id ${req.params.id}`, 404));
+    }
+
+    
+    if (req.file) {
+        const uniqueFilename = `subscriptions/${uuidv4()}-${req.file.originalname}`;
+    
+        // Upload to Cloudinary
+        cloudinary.uploader.upload_stream({ 
+          resource_type: 'image',
+          public_id: uniqueFilename,
+        }, async (error, result) => {
+          if (error) {
+            return next(new AppError('Failed to upload image to Cloudinary', 500));
+          }
+    
+          document.subscripImage = result.secure_url;
+          await document.save();
+    
+          res.status(200).json({ data: document });
+        }).end(req.file.buffer);
+      } else {
+        res.status(200).json({ data: document });
+      }
+  
+   
+  });
