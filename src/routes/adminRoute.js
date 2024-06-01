@@ -18,5 +18,6 @@ router.delete("/:id", adminController.deleteAdmin);
 
 router.post("/app/settings", adminController.saveAppSettings);
 router.get("/app/settings", adminController.getAppSettings);
+router.get("/oflineInfo", adminController.getOflineInfo);
 
 module.exports = router;

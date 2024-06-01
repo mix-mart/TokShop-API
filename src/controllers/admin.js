@@ -188,3 +188,15 @@ exports.deleteAdmin = async function (req, res) {
     res.status(404).send({ success: false, message: error });
   }
 };
+
+exports.getOflineInfo= async function(req,res){
+  try{
+    const settings = await AppSettingsSchema.find();
+    console.log(settings)
+    const lastSettings=await AppSettingsSchema.findById({ _id: settings[0]._id })
+// console.log(lastSettings)
+    res.json({ success: true,oflineInfo:lastSettings.oflineInfo });
+  } catch (error) {
+    res.status(404).send({ success: false, message: error });
+  }
+}

@@ -108,6 +108,10 @@ const AppSettingsSchema = mongoose.Schema({
     type: String,
     default: "",
   },
+  oflineInfo: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("appsettings", AppSettingsSchema);
