@@ -94,10 +94,12 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
         return next(new AppError('Your subscription has been expired! please, go and renew you subscription.', 500))
     }
     if (lastSubscription.status=="Pending") {
-        return next(new AppError('Your subscription Pending please wait.', 500))
+        return res.status(500).json({ error: 'Your subscription Pending please wait' });
+        //return next(new AppError('Your subscription Pending please wait.', 500))
     }
     if (lastSubscription.status=="Failed") {
-        return next(new AppError('Your subscription failed .', 500))
+        return res.status(500).json({ error: 'Your subscription failed' });
+        //return next(new AppError('Your subscription failed .', 500))
     }
    
 
