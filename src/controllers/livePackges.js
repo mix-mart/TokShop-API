@@ -130,10 +130,12 @@ exports.isSubscribedToLivePackage = catchAsync(async (req, res, next) => {
   const lastSubscription = AllSubscriptions[0];
   if (AllSubscriptions.length === 0) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
   if (lastSubscription.status=="Pending") {
-    return next(new AppError('Your subscription Pending please wait.', 500))
+    return res.status(500).json({ error: 'Your subscription Pending please wait' });
+    //return next(new AppError('Your subscription Pending please wait.', 500))
 }
 if (lastSubscription.status=="Failed") {
-    return next(new AppError('Your subscription failed .', 500))
+  return res.status(500).json({ error: 'Your subscription failed' });
+   // return next(new AppError('Your subscription failed .', 500))
 }
 
   res.status(200).json({
