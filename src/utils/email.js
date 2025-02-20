@@ -15,21 +15,34 @@ module.exports = class Email {
 
 
 
-    newTransport() {
-        return nodemailer.createTransport({
-            host: "smtp.office365.com",
-             secure: false,
-            port: 587,
-            domain: 'mix-mart.online',
-            auth: {
-                user: "info@mix-mart.online",
-                pass: "mbrskkpcwtsmfmvh"
-            },
-            // secureConnection: true,
-            // tls: { ciphers: 'SSLv3' }
+    // newTransport() {
+    //     return nodemailer.createTransport({
+    //         host: "smtp.office365.com",
+    //          secure: false,
+    //         port: 587,
+    //         domain: 'mix-mart.online',
+    //         auth: {
+    //             user: "info@mix-mart.online",
+    //             pass: "mbrskkpcwtsmfmvh"
+    //         },
+    //         // secureConnection: true,
+    //         // tls: { ciphers: 'SSLv3' }
 
-        });
-    }
+    //     });
+    // }
+    newTransport() {
+      return nodemailer.createTransport({
+          host: "smtpout.secureserver.net", // GoDaddy's SMTP host
+          port: 465, // Port for secure SMTP
+          secure: true, // Use SSL
+          auth: {
+              user: "info@mix-mart.online", // Your email address
+              pass: "M0XM@rt007@@" // Your email password
+          }
+      });
+  }
+  
+
 
 
 

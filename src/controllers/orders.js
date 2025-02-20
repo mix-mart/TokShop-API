@@ -957,7 +957,7 @@ exports.addOrder = async (req, res) => {
           shippingAddress: item.shippingAddress, //to be removed afteer update of ui
           paymentMethod: item.paymentMethod,
           shopId: item.shopId,
-          subTotal: totalAmount - serviceFee,
+          subTotal: totalAmount - serviceFee,     
           tax: item.tax,
           shippingFee: item.shippingFee,
           servicefee: serviceFee,
