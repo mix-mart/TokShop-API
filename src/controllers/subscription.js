@@ -115,6 +115,38 @@ exports.isSubscriptionValid = catchAsync(async (req, res, next) => {
 
 })
 
+exports.isFreeSubscriptionValid = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const AllSubscriptions = await Subscription.find({ userId }).sort({ createdAt: -1 });
+  console.log(AllSubscriptions)
+  if (!AllSubscriptions) return next(new AppError("You are not subscribed to a package yet.please go and subscribe!", 500));
+  const lastSubscription = AllSubscriptions[0];
+  const packageId = AllSubscriptions[0].packageId;
+  const package = await Package.findById(packageId);
+  const numberOfProducts = package.numberOfProducts;
+  const previousProducts = await Product.find({ ownerId: userId, createdAt: { $gt: lastSubscription.createdAt } });
+  const numberOfPreviousProducts = previousProducts.length;
+  if (numberOfPreviousProducts >= numberOfProducts) {
+      return next(new AppError('You are not allowed to upload more products in that subscription, please go and upgrade your subscription or buy more credits.', 500))
+  }
+  
+ 
+
+
+
+
+  // res.status(200).json(AllSubscriptions)
+  res.status(200).json({
+      status: "success",
+      isAllowed: true,
+      message: "you are allowed to add product"
+  })
+
+})
+
+
+
+
 exports.updateSubscrip = catchAsync(async (req, res, next) => {
     const document = await Subscription.findByIdAndUpdate(req.params.subscriptionId, req.body, {
       new: true,

@@ -36,6 +36,7 @@ const uploadVideoRoute = require('./uploadVideoRoute')
 const passport = require("passport");
 const { getAllActivePackage } = require("../controllers/packages");
 const { sendmail, froProtect } = require("../controllers/froBlog");
+const { isFreeSubscriptionValid } = require("../controllers/subscription");
 // const { app } = require("firebase-admin");
 
 require("../services/authenticate");
@@ -64,6 +65,7 @@ app.use('/coupons', couponRoute);
 app.use('/froBlog',froBlogRoute);
 app.use("/livePackges", LivePackageRouter);
 app.get("/is-subscription-valid", authController.protect, livePackageController.isSubscribedToLivePackage);
+app.get("/isFreeSubscription-valid", authController.protect, isFreeSubscriptionValid);
 app.get("/prodPackages/active" , getAllActivePackage);
 app.get("/livePackages/active" , livePackageController.getAllActiveLivePackages);
 app.use("/videos", uploadVideoRoute);
